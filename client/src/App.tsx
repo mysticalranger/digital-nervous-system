@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
+import FloatingNotifications from "@/components/floating-notifications";
 
 function Router() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <TooltipProvider>
         <div className="min-h-screen bg-gradient-to-br from-[hsl(var(--deep-space))] via-[hsl(var(--dark-navy))] to-[hsl(var(--deep-space))] text-white">
           <Toaster />
+          <FloatingNotifications />
           <Router />
         </div>
       </TooltipProvider>
