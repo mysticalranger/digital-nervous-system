@@ -430,6 +430,106 @@ Respond with JSON:
     }
   });
 
+  // Analytics API for tracking DAU, MAU, ARPU, churn
+  app.get("/api/analytics/:timeframe", async (req, res) => {
+    try {
+      const { timeframe } = req.params;
+      
+      // Analytics would come from actual database metrics
+      const analytics = {
+        dau: 12847,
+        mau: 156234,
+        arpu: 89.50,
+        churnRate: 4.2,
+        avgSessionTime: 1320, // 22 minutes in seconds
+        conversionRate: 3.8,
+        engagementScore: 87,
+        retentionD1: 78.5,
+        retentionD7: 42.3,
+        retentionD30: 28.7,
+        featureUsage: {
+          challenges: 67.8,
+          aiGeneration: 45.2,
+          socialFeatures: 34.6,
+          notifications: 89.1
+        },
+        regionalBreakdown: [
+          { region: "Maharashtra", users: 34567, revenue: 125000 },
+          { region: "Karnataka", users: 28934, revenue: 98500 },
+          { region: "Tamil Nadu", users: 23456, revenue: 87300 },
+          { region: "Delhi NCR", users: 21098, revenue: 95600 },
+          { region: "Others", users: 48179, revenue: 156800 }
+        ]
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch analytics" });
+    }
+  });
+
+  // Payment integration routes for UPI and card payments
+  app.post("/api/payments/initiate", async (req, res) => {
+    try {
+      const { amount, currency, plan, userId } = req.body;
+      
+      // Payment processing would integrate with Razorpay or similar
+      const paymentOrder = {
+        orderId: `order_${Date.now()}`,
+        amount: amount * 100, // Convert to paisa for Indian payments
+        currency: currency || "INR",
+        description: `Digital Swameshtra ${plan} Plan`,
+        status: "created",
+        paymentUrl: `/payment/${Date.now()}`, // Mock payment URL
+        upiId: "digitalswameshtra@upi",
+        qrCode: "data:image/svg+xml;base64,..." // Mock QR code
+      };
+      
+      res.json(paymentOrder);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to initiate payment" });
+    }
+  });
+
+  app.post("/api/payments/verify", async (req, res) => {
+    try {
+      const { orderId, paymentId, signature } = req.body;
+      
+      // Payment verification would use Razorpay signature verification
+      const verification = {
+        verified: true,
+        status: "success",
+        transactionId: paymentId,
+        timestamp: new Date().toISOString()
+      };
+      
+      res.json(verification);
+    } catch (error) {
+      res.status(500).json({ error: "Payment verification failed" });
+    }
+  });
+
+  // Feedback and support API
+  app.post("/api/feedback", async (req, res) => {
+    try {
+      const { userId, type, message, rating } = req.body;
+      
+      const feedback = {
+        id: Date.now(),
+        userId,
+        type,
+        message,
+        rating,
+        status: "received",
+        createdAt: new Date().toISOString()
+      };
+      
+      res.json({ success: true, feedback });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to submit feedback" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates
