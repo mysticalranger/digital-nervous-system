@@ -141,8 +141,15 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
     const user: User = {
-      ...insertUser,
       id,
+      username: insertUser.username,
+      email: insertUser.email,
+      karmaPoints: insertUser.karmaPoints || 0,
+      region: insertUser.region,
+      language: insertUser.language || "en",
+      achievements: Array.isArray(insertUser.achievements) ? insertUser.achievements : [],
+      projectsCreated: insertUser.projectsCreated || 0,
+      communityRank: insertUser.communityRank || 0,
       createdAt: new Date(),
     };
     this.users.set(id, user);
@@ -184,8 +191,16 @@ export class MemStorage implements IStorage {
   async createProject(insertProject: InsertProject): Promise<Project> {
     const id = this.currentProjectId++;
     const project: Project = {
-      ...insertProject,
       id,
+      userId: insertProject.userId,
+      title: insertProject.title,
+      description: insertProject.description,
+      targetRegion: insertProject.targetRegion,
+      aiComplexity: insertProject.aiComplexity,
+      status: insertProject.status || "active",
+      culturalScore: insertProject.culturalScore || 0,
+      languages: Array.isArray(insertProject.languages) ? insertProject.languages : [],
+      metrics: insertProject.metrics || {},
       createdAt: new Date(),
     };
     this.projects.set(id, project);
@@ -247,8 +262,11 @@ export class MemStorage implements IStorage {
   async createCommunityActivity(insertActivity: InsertCommunityActivity): Promise<CommunityActivity> {
     const id = this.currentActivityId++;
     const activity: CommunityActivity = {
-      ...insertActivity,
       id,
+      userId: insertActivity.userId,
+      activityType: insertActivity.activityType,
+      description: insertActivity.description,
+      karmaEarned: insertActivity.karmaEarned || 0,
       createdAt: new Date(),
     };
     this.communityActivities.set(id, activity);
