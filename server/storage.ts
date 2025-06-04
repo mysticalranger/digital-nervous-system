@@ -356,4 +356,380 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { eq, desc, and } from "drizzle-orm";
+
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async updateUserKarma(userId: number, karma: number): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ karmaPoints: karma })
+      .where(eq(users.id, userId))
+      .returning();
+    return user || undefined;
+  }
+
+  async getLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        region: users.region,
+        karmaPoints: users.karmaPoints,
+        rank: users.communityRank
+      })
+      .from(users)
+      .orderBy(desc(users.karmaPoints))
+      .limit(limit);
+
+    return result.map((user, index) => ({
+      ...user,
+      rank: index + 1
+    }));
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project || undefined;
+  }
+
+  async getProjectsByUser(userId: number): Promise<Project[]> {
+    return await db.select().from(projects).where(eq(projects.userId, userId));
+  }
+
+  async createProject(insertProject: InsertProject): Promise<Project> {
+    const [project] = await db
+      .insert(projects)
+      .values(insertProject)
+      .returning();
+    return project;
+  }
+
+  async updateProject(id: number, updates: Partial<Project>): Promise<Project | undefined> {
+    const [project] = await db
+      .update(projects)
+      .set(updates)
+      .where(eq(projects.id, id))
+      .returning();
+    return project || undefined;
+  }
+
+  async getProjectMetrics(): Promise<{ total: number; active: number; byRegion: Record<string, number> }> {
+    const allProjects = await db.select().from(projects);
+    const total = allProjects.length;
+    const active = allProjects.filter(p => p.status === 'active').length;
+    
+    const byRegion: Record<string, number> = {};
+    for (const project of allProjects) {
+      const user = await this.getUser(project.userId);
+      if (user) {
+        byRegion[user.region] = (byRegion[user.region] || 0) + 1;
+      }
+    }
+
+    return { total, active, byRegion };
+  }
+
+  async getAiModel(id: number): Promise<AiModel | undefined> {
+    const [model] = await db.select().from(aiModels).where(eq(aiModels.id, id));
+    return model || undefined;
+  }
+
+  async getActiveAiModels(): Promise<AiModel[]> {
+    return await db.select().from(aiModels).where(eq(aiModels.isActive, true));
+  }
+
+  async updateAiModelMetrics(id: number, accuracy: number, latency: number): Promise<AiModel | undefined> {
+    const [model] = await db
+      .update(aiModels)
+      .set({ accuracy, responseTime: latency, lastUpdated: new Date() })
+      .where(eq(aiModels.id, id))
+      .returning();
+    return model || undefined;
+  }
+
+  async getCommunityActivity(limit: number = 20): Promise<CommunityActivity[]> {
+    return await db
+      .select()
+      .from(communityActivity)
+      .orderBy(desc(communityActivity.createdAt))
+      .limit(limit);
+  }
+
+  async createCommunityActivity(insertActivity: InsertCommunityActivity): Promise<CommunityActivity> {
+    const [activity] = await db
+      .insert(communityActivity)
+      .values(insertActivity)
+      .returning();
+    return activity;
+  }
+
+  async getAchievements(): Promise<Achievement[]> {
+    return await db.select().from(achievements);
+  }
+
+  async getUserAchievements(userId: number): Promise<string[]> {
+    const user = await this.getUser(userId);
+    return user?.achievements || [];
+  }
+
+  async unlockAchievement(userId: number, achievementId: string): Promise<boolean> {
+    const user = await this.getUser(userId);
+    if (!user) return false;
+
+    const currentAchievements = user.achievements || [];
+    if (currentAchievements.includes(achievementId)) return false;
+
+    const updatedAchievements = [...currentAchievements, achievementId];
+    await db
+      .update(users)
+      .set({ achievements: updatedAchievements })
+      .where(eq(users.id, userId));
+
+    return true;
+  }
+
+  async getUserEngagement(userId: number): Promise<UserEngagement | undefined> {
+    const [engagement] = await db
+      .select()
+      .from(userEngagements)
+      .where(eq(userEngagements.userId, userId));
+    return engagement || undefined;
+  }
+
+  async updateUserEngagement(userId: number, engagement: Partial<UserEngagement>): Promise<UserEngagement> {
+    const existing = await this.getUserEngagement(userId);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(userEngagements)
+        .set({ ...engagement, updatedAt: new Date() })
+        .where(eq(userEngagements.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(userEngagements)
+        .values({ userId, ...engagement })
+        .returning();
+      return created;
+    }
+  }
+
+  async incrementUserStreak(userId: number): Promise<UserEngagement> {
+    const existing = await this.getUserEngagement(userId);
+    const today = new Date().toDateString();
+    const lastActive = existing?.lastActiveDate ? new Date(existing.lastActiveDate).toDateString() : null;
+    
+    let newStreak = 1;
+    if (existing && lastActive === today) {
+      return existing; // Already incremented today
+    } else if (existing && lastActive === new Date(Date.now() - 24*60*60*1000).toDateString()) {
+      newStreak = existing.dailyStreak + 1;
+    }
+
+    return this.updateUserEngagement(userId, {
+      dailyStreak: newStreak,
+      lastActiveDate: new Date()
+    });
+  }
+
+  async addUserPoints(userId: number, points: number): Promise<UserEngagement> {
+    const existing = await this.getUserEngagement(userId);
+    const currentPoints = existing?.totalPoints || 0;
+    
+    return this.updateUserEngagement(userId, {
+      totalPoints: currentPoints + points
+    });
+  }
+
+  async getDailyChallenges(): Promise<DailyChallenge[]> {
+    return await db.select().from(dailyChallenges).where(eq(dailyChallenges.isActive, true));
+  }
+
+  async getActiveChallenges(): Promise<DailyChallenge[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(dailyChallenges)
+      .where(and(
+        eq(dailyChallenges.isActive, true),
+        // Add proper timestamp comparison when needed
+      ));
+  }
+
+  async createDailyChallenge(challenge: Omit<DailyChallenge, 'id' | 'participants' | 'completedBy'>): Promise<DailyChallenge> {
+    const [created] = await db
+      .insert(dailyChallenges)
+      .values({
+        id: `challenge-${Date.now()}`,
+        participants: 0,
+        completedBy: [],
+        ...challenge
+      })
+      .returning();
+    return created;
+  }
+
+  async completeChallenge(challengeId: string, userId: number): Promise<boolean> {
+    const [challenge] = await db
+      .select()
+      .from(dailyChallenges)
+      .where(eq(dailyChallenges.id, challengeId));
+    
+    if (!challenge || challenge.completedBy.includes(userId)) return false;
+
+    const updatedCompletedBy = [...challenge.completedBy, userId];
+    await db
+      .update(dailyChallenges)
+      .set({
+        completedBy: updatedCompletedBy,
+        participants: challenge.participants + 1
+      })
+      .where(eq(dailyChallenges.id, challengeId));
+
+    return true;
+  }
+
+  async getUserNotifications(userId: number): Promise<Notification[]> {
+    return await db
+      .select()
+      .from(notifications)
+      .where(eq(notifications.userId, userId))
+      .orderBy(desc(notifications.createdAt));
+  }
+
+  async createNotification(notification: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification> {
+    const [created] = await db
+      .insert(notifications)
+      .values({
+        id: `notif-${Date.now()}-${Math.random()}`,
+        createdAt: new Date(),
+        ...notification
+      })
+      .returning();
+    return created;
+  }
+
+  async markNotificationRead(notificationId: string): Promise<boolean> {
+    const [updated] = await db
+      .update(notifications)
+      .set({ isRead: true })
+      .where(eq(notifications.id, notificationId))
+      .returning();
+    return !!updated;
+  }
+
+  async getFriends(userId: number): Promise<User[]> {
+    const connections = await db
+      .select({ friendId: socialConnections.friendId })
+      .from(socialConnections)
+      .where(and(
+        eq(socialConnections.userId, userId),
+        eq(socialConnections.status, 'accepted')
+      ));
+
+    const friendIds = connections.map(c => c.friendId);
+    if (friendIds.length === 0) return [];
+
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.id, friendIds[0])); // Simplified for now
+  }
+
+  async sendFriendRequest(userId: number, friendId: number): Promise<SocialConnection> {
+    const [connection] = await db
+      .insert(socialConnections)
+      .values({ userId, friendId, status: 'pending' })
+      .returning();
+    return connection;
+  }
+
+  async acceptFriendRequest(connectionId: number): Promise<boolean> {
+    const [updated] = await db
+      .update(socialConnections)
+      .set({ status: 'accepted' })
+      .where(eq(socialConnections.id, connectionId))
+      .returning();
+    return !!updated;
+  }
+
+  async getUserPresence(userId: number): Promise<UserPresence | undefined> {
+    const [presence] = await db
+      .select()
+      .from(userPresences)
+      .where(eq(userPresences.userId, userId));
+    return presence || undefined;
+  }
+
+  async updateUserPresence(userId: number, presence: Partial<UserPresence>): Promise<UserPresence> {
+    const existing = await this.getUserPresence(userId);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(userPresences)
+        .set({ ...presence, updatedAt: new Date() })
+        .where(eq(userPresences.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db
+        .insert(userPresences)
+        .values({ userId, ...presence })
+        .returning();
+      return created;
+    }
+  }
+
+  async getMetrics(): Promise<MetricsUpdate> {
+    const totalUsers = await db.select().from(users);
+    const totalProjects = await db.select().from(projects);
+    const activeModels = await db.select().from(aiModels).where(eq(aiModels.isActive, true));
+    
+    const totalKarma = totalUsers.reduce((sum, user) => sum + (user.karmaPoints || 0), 0);
+    const avgAccuracy = activeModels.reduce((sum, model) => sum + (model.accuracy || 0), 0) / (activeModels.length || 1);
+
+    return {
+      activeUsers: totalUsers.length,
+      projectsCreated: totalProjects.length,
+      karmaPoints: totalKarma,
+      regionalImpact: Math.floor(Math.random() * 100), // Placeholder calculation
+      aiAccuracy: avgAccuracy,
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  async getActivityFeed(): Promise<ActivityFeedItem[]> {
+    const activities = await this.getCommunityActivity(10);
+    
+    return activities.map(activity => ({
+      id: activity.id.toString(),
+      type: activity.activityType as any,
+      message: activity.description,
+      timestamp: activity.createdAt.toISOString(),
+      color: 'blue' as const,
+      userId: activity.userId
+    }));
+  }
+}
+
+export const storage = new DatabaseStorage();

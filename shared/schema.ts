@@ -59,6 +59,63 @@ export const achievements = pgTable("achievements", {
   category: text("category").notNull(),
 });
 
+export const userEngagements = pgTable("user_engagements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  dailyStreak: integer("daily_streak").notNull().default(0),
+  lastActiveDate: timestamp("last_active_date").notNull().defaultNow(),
+  totalPoints: integer("total_points").notNull().default(0),
+  level: integer("level").notNull().default(1),
+  badges: json("badges").$type<string[]>().notNull().default([]),
+  completedChallenges: json("completed_challenges").$type<string[]>().notNull().default([]),
+  referralCount: integer("referral_count").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const dailyChallenges = pgTable("daily_challenges", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(),
+  difficulty: text("difficulty").notNull(),
+  points: integer("points").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  participants: integer("participants").notNull().default(0),
+  completedBy: json("completed_by").$type<number[]>().notNull().default([]),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  priority: text("priority").notNull(),
+  actionUrl: text("action_url"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const socialConnections = pgTable("social_connections", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  friendId: integer("friend_id").notNull(),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const userPresences = pgTable("user_presences", {
+  userId: integer("user_id").primaryKey(),
+  isOnline: boolean("is_online").notNull().default(false),
+  lastSeen: timestamp("last_seen").notNull().defaultNow(),
+  currentActivity: text("current_activity"),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
