@@ -1,0 +1,86 @@
+# Prompt for Replit: Integrate Addictive User Engagement Features
+
+## Objective
+Enhance our Digital Swadeshi platform with features that drive daily user engagement and subscription retention. The goal is to make the platform irresistible for everyday users by leveraging proven psychological triggers (FOMO, social proof, variable rewards, etc.), tailored for the Indian market.
+
+## Core Features to Integrate
+
+1. **Personalized Content Feed**
+   - AI-driven recommendations for each user (content, challenges, tips).
+   - Feed should update dynamically based on user activity and preferences.
+
+2. **Real-Time Alerts & Notifications**
+   - Push notifications for achievements, new content, community activity, and expiring challenges.
+   - Customizable notification settings for users.
+
+3. **Infinite Scroll and Autoplay**
+   - Implement endless scrolling for feeds and autoplay for video or audio content.
+   - Remove stopping cues to encourage longer sessions.
+
+4. **Ephemeral Content**
+   - Daily or weekly content (tips, quizzes, challenges) that disappears after 24 hours.
+   - Highlight urgency and FOMO for this content.
+
+5. **Gamification & Variable Rewards**
+   - Points, badges, streaks, and random rewards for engagement.
+   - Use variable (randomized) reward schedules for surprise and delight.
+
+6. **Social Proof & Community Features**
+   - Leaderboards, real-time user stats, and visible achievements.
+   - Community challenges and peer recognition (e.g., “X users completed this today!”).
+
+7. **Referral & Reciprocity Incentives**
+   - Reward users for inviting friends and helping others.
+   - Social graph integration to show friends’ activity.
+
+8. **Presence Indicators & Quick Messaging**
+   - Show when friends/community members are online.
+   - Enable instant messaging, reactions, and quick replies.
+
+9. **Personal Growth & Infotainment**
+   - Daily micro-lessons, quizzes, or wellness tips that blend learning with fun.
+   - Track progress and provide personalized recommendations.
+
+10. **Scarcity & Limited-Time Offers**
+    - Regular exclusive content or features available for a short time.
+    - Limited-time discounts or bonuses for subscriptions.
+
+## Implementation Guidelines
+
+- Use modular, scalable code (preferably Python, TypeScript, React/Next.js, Node.js).
+- Integrate with Indian payment gateways (Razorpay, UPI).
+- Support regional languages for content and notifications.
+- Prioritize mobile-first design and fast, real-time updates.
+- Ensure analytics are in place to track feature usage and engagement.
+- Allow the system to suggest new addictive features based on user data and behavioral patterns.
+
+## Psychological Triggers to Emphasize
+
+- FOMO (fear of missing out)
+- Social validation and competition
+- Surprise and anticipation (variable rewards)
+- Progress tracking and achievement
+- Community belonging and reciprocity
+
+## Self-Improvement Clause
+
+- The AI should reason about which features are most effective for engagement and suggest improvements or new features over time.
+- Regularly A/B test new engagement mechanics and integrate successful ones.
+
+## Example User Flow
+
+1. User logs in and sees a personalized feed with a daily challenge and leaderboard.
+2. They receive a notification about a limited-time quiz.
+3. Completing the quiz earns them a badge and boosts their streak.
+4. They see friends online and send a quick message.
+5. They invite a friend and get a referral bonus.
+
+## Deliverables
+
+- Fully functional and integrated features as described above.
+- Clean, well-documented code.
+- Suggestions for further addictive features based on user analytics.
+
+---
+
+**Please reason step-by-step for each feature, ensuring optimal user experience and maximum engagement. Suggest improvements or additional features if you identify new engagement opportunities.**

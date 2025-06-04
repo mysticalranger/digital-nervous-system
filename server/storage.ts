@@ -7,7 +7,12 @@ import {
   type Achievement, type InsertAchievement,
   type MetricsUpdate,
   type ActivityFeedItem,
-  type LeaderboardEntry
+  type LeaderboardEntry,
+  type UserEngagement,
+  type DailyChallenge,
+  type Notification,
+  type SocialConnection,
+  type UserPresence
 } from "@shared/schema";
 
 export interface IStorage {
@@ -42,6 +47,30 @@ export interface IStorage {
   // Real-time metrics
   getMetrics(): Promise<MetricsUpdate>;
   getActivityFeed(): Promise<ActivityFeedItem[]>;
+
+  // User Engagement
+  getUserEngagement(userId: number): Promise<UserEngagement | undefined>;
+  updateUserEngagement(userId: number, engagement: Partial<UserEngagement>): Promise<UserEngagement>;
+  incrementUserStreak(userId: number): Promise<UserEngagement>;
+  addUserPoints(userId: number, points: number): Promise<UserEngagement>;
+  
+  // Daily Challenges
+  getDailyChallenges(): Promise<DailyChallenge[]>;
+  getActiveChallenges(): Promise<DailyChallenge[]>;
+  createDailyChallenge(challenge: Omit<DailyChallenge, 'id' | 'participants' | 'completedBy'>): Promise<DailyChallenge>;
+  completeChallenge(challengeId: string, userId: number): Promise<boolean>;
+  
+  // Notifications
+  getUserNotifications(userId: number): Promise<Notification[]>;
+  createNotification(notification: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification>;
+  markNotificationRead(notificationId: string): Promise<boolean>;
+  
+  // Social Features
+  getFriends(userId: number): Promise<User[]>;
+  sendFriendRequest(userId: number, friendId: number): Promise<SocialConnection>;
+  acceptFriendRequest(connectionId: number): Promise<boolean>;
+  getUserPresence(userId: number): Promise<UserPresence | undefined>;
+  updateUserPresence(userId: number, presence: Partial<UserPresence>): Promise<UserPresence>;
 }
 
 export class MemStorage implements IStorage {
@@ -50,9 +79,15 @@ export class MemStorage implements IStorage {
   private aiModels: Map<number, AiModel>;
   private communityActivities: Map<number, CommunityActivity>;
   private achievementsList: Map<number, Achievement>;
+  private userEngagements: Map<number, UserEngagement>;
+  private dailyChallenges: Map<string, DailyChallenge>;
+  private notifications: Map<string, Notification>;
+  private socialConnections: Map<number, SocialConnection>;
+  private userPresences: Map<number, UserPresence>;
   private currentUserId: number;
   private currentProjectId: number;
   private currentActivityId: number;
+  private currentNotificationId: number;
 
   constructor() {
     this.users = new Map();

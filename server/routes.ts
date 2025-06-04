@@ -304,6 +304,132 @@ Respond with JSON:
     }
   });
 
+  // Engagement API routes for addictive features
+  app.get("/api/engagement/challenges", async (req, res) => {
+    try {
+      const challenges = [
+        {
+          id: "daily-1",
+          title: "Build a Cultural AI Feature",
+          description: "Create an AI feature that incorporates Indian cultural elements or regional language support",
+          type: "coding",
+          difficulty: "medium",
+          points: 150,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          participants: Math.floor(Math.random() * 500) + 100,
+          isCompleted: false
+        },
+        {
+          id: "daily-2", 
+          title: "Community Knowledge Share",
+          description: "Share a tech tip or cultural insight with the community",
+          type: "community",
+          difficulty: "easy",
+          points: 75,
+          expiresAt: new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(),
+          participants: Math.floor(Math.random() * 300) + 50,
+          isCompleted: false
+        },
+        {
+          id: "daily-3",
+          title: "Regional Impact Project",
+          description: "Start a project that addresses a local Indian community need",
+          type: "cultural",
+          difficulty: "hard", 
+          points: 300,
+          expiresAt: new Date(Date.now() + 18 * 60 * 60 * 1000).toISOString(),
+          participants: Math.floor(Math.random() * 150) + 25,
+          isCompleted: false
+        }
+      ];
+      res.json(challenges);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch challenges" });
+    }
+  });
+
+  app.get("/api/engagement/notifications/:userId", async (req, res) => {
+    try {
+      const notifications = [
+        {
+          id: "notif-1",
+          type: "streak",
+          title: "Streak Milestone!",
+          message: "You're on a 7-day streak! Keep going to unlock the Cultural Pioneer badge",
+          priority: "high",
+          createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "notif-2",
+          type: "limited_offer",
+          title: "Limited Time: Premium Features",
+          message: "Unlock advanced AI models for free - only 2 hours left!",
+          priority: "high",
+          createdAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+          expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString()
+        },
+        {
+          id: "notif-3",
+          type: "social",
+          title: "Friend Achievement",
+          message: "Rajesh just completed the AI Ethics challenge! Join them?",
+          priority: "medium",
+          createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString()
+        },
+        {
+          id: "notif-4",
+          type: "achievement",
+          title: "New Badge Earned!",
+          message: "Congratulations! You've earned the 'Community Builder' badge",
+          priority: "medium",
+          createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString()
+        }
+      ];
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  app.get("/api/engagement/streak/:userId", async (req, res) => {
+    try {
+      const streak = {
+        current: Math.floor(Math.random() * 15) + 3,
+        longest: Math.floor(Math.random() * 30) + 10,
+        todayCompleted: Math.random() > 0.5
+      };
+      res.json(streak);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch streak" });
+    }
+  });
+
+  app.post("/api/engagement/challenges/:challengeId/complete", async (req, res) => {
+    try {
+      const { challengeId } = req.params;
+      const { userId } = req.body;
+      
+      // Variable reward system - random bonus points
+      const baseReward = 100;
+      const bonusMultiplier = Math.random() > 0.7 ? (Math.random() * 2 + 1) : 1;
+      const totalPoints = Math.floor(baseReward * bonusMultiplier);
+      
+      const result = {
+        success: true,
+        points: totalPoints,
+        bonus: bonusMultiplier > 1,
+        message: bonusMultiplier > 1 ? `Amazing! Bonus reward: ${totalPoints} points!` : `Great job! Earned ${totalPoints} points`,
+        streakIncreased: true,
+        newBadge: Math.random() > 0.8 ? "Cultural Pioneer" : null
+      };
+      
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to complete challenge" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time updates

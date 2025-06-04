@@ -117,10 +117,68 @@ export interface MetricsUpdate {
 
 export interface ActivityFeedItem {
   id: string;
-  type: 'deployment' | 'challenge' | 'milestone';
+  type: 'deployment' | 'challenge' | 'milestone' | 'achievement' | 'streak' | 'social' | 'limited_time';
   message: string;
   timestamp: string;
-  color: 'blue' | 'purple' | 'orange';
+  color: 'blue' | 'purple' | 'orange' | 'green' | 'red' | 'yellow';
+  userId?: number;
+  urgency?: 'low' | 'medium' | 'high';
+  expiresAt?: string;
+}
+
+export interface UserEngagement {
+  id: number;
+  userId: number;
+  dailyStreak: number;
+  lastActiveDate: string;
+  totalPoints: number;
+  level: number;
+  badges: string[];
+  completedChallenges: string[];
+  referralCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DailyChallenge {
+  id: string;
+  title: string;
+  description: string;
+  type: 'coding' | 'cultural' | 'community' | 'learning';
+  difficulty: 'easy' | 'medium' | 'hard';
+  points: number;
+  expiresAt: string;
+  participants: number;
+  completedBy: number[];
+  isActive: boolean;
+}
+
+export interface Notification {
+  id: string;
+  userId: number;
+  type: 'achievement' | 'challenge' | 'social' | 'streak' | 'limited_offer' | 'community';
+  title: string;
+  message: string;
+  isRead: boolean;
+  priority: 'low' | 'medium' | 'high';
+  actionUrl?: string;
+  createdAt: string;
+  expiresAt?: string;
+}
+
+export interface SocialConnection {
+  id: number;
+  userId: number;
+  friendId: number;
+  status: 'pending' | 'accepted' | 'blocked';
+  createdAt: string;
+}
+
+export interface UserPresence {
+  userId: number;
+  isOnline: boolean;
+  lastSeen: string;
+  currentActivity?: string;
 }
 
 export interface LeaderboardEntry {
