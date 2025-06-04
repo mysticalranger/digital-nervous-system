@@ -140,45 +140,136 @@ export default function AiDashboard() {
             
             <motion.div 
               className="dashboard-card"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              whileHover={{ 
+                scale: 1.03,
+                rotateY: -2,
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Karma Score</h5>
-                <i className="fas fa-star text-[hsl(var(--royal-purple))]"></i>
+                <motion.i 
+                  className="fas fa-star text-[hsl(var(--royal-purple))]"
+                  animate={{ 
+                    rotate: [0, 10, -10, 0],
+                    scale: [1, 1.2, 1]
+                  }}
+                  transition={{ 
+                    duration: 3,
+                    repeat: Infinity,
+                    delay: 1.2
+                  }}
+                />
               </div>
-              <div className="text-3xl font-bold text-[hsl(var(--royal-purple))] mb-2">
+              <motion.div 
+                className="text-3xl font-bold text-[hsl(var(--royal-purple))] mb-2"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+              >
                 {metrics?.karmaPoints ? Math.floor(metrics.karmaPoints / 1000) : 8942}
-              </div>
-              <div className="text-sm text-green-400">+15% this week</div>
+              </motion.div>
+              <motion.div 
+                className="text-sm text-green-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.8 }}
+              >
+                +15% this week
+              </motion.div>
             </motion.div>
             
             <motion.div 
               className="dashboard-card"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              whileHover={{ 
+                scale: 1.03,
+                rotateY: 2,
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Regional Impact</h5>
-                <i className="fas fa-globe-asia text-[hsl(var(--vibrant-orange))]"></i>
+                <motion.i 
+                  className="fas fa-globe-asia text-[hsl(var(--vibrant-orange))]"
+                  animate={{ 
+                    rotate: [0, 360],
+                  }}
+                  transition={{ 
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                />
               </div>
-              <div className="text-3xl font-bold text-[hsl(var(--vibrant-orange))] mb-2">
-                {metrics?.regionalImpact || 18}
-              </div>
-              <div className="text-sm text-gray-400">states reached</div>
+              <motion.div 
+                className="text-3xl font-bold text-[hsl(var(--vibrant-orange))] mb-2"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.8 }}
+              >
+                18
+              </motion.div>
+              <motion.div 
+                className="text-sm text-gray-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                states reached
+              </motion.div>
             </motion.div>
             
             <motion.div 
               className="dashboard-card"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              whileHover={{ 
+                scale: 1.03,
+                rotateY: -2,
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Community Rank</h5>
-                <i className="fas fa-trophy text-yellow-400"></i>
+                <motion.i 
+                  className="fas fa-trophy text-yellow-400"
+                  animate={{ 
+                    y: [0, -5, 0],
+                    rotate: [0, 5, -5, 0]
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    delay: 2
+                  }}
+                />
               </div>
-              <div className="text-3xl font-bold text-yellow-400 mb-2">#47</div>
-              <div className="text-sm text-green-400">↑12 positions</div>
+              <motion.div 
+                className="text-3xl font-bold text-yellow-400 mb-2"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 1 }}
+              >
+                #47
+              </motion.div>
+              <motion.div 
+                className="text-sm text-green-400"
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.2 }}
+              >
+                ↑12 positions
+              </motion.div>
             </motion.div>
           </div>
 
