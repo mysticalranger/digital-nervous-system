@@ -118,8 +118,15 @@ export default function AiDashboard() {
           <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-6 mb-8">
             <motion.div 
               className="dashboard-card"
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              whileHover={{ 
+                scale: 1.03,
+                rotateY: 2,
+                transition: { duration: 0.3 }
+              }}
+              whileTap={{ scale: 0.98 }}
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Active Projects</h5>

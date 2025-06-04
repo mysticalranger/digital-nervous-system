@@ -73,8 +73,8 @@ export default function Navigation() {
                 <SelectItem value="bn">বাংলা</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="interactive-button pulse-glow">
-              Join Ecosystem
+            <Button className="interactive-button pulse-glow magnetic-hover">
+              <span>Join Ecosystem</span>
             </Button>
           </div>
         </div>
