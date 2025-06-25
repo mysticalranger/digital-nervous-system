@@ -1,17 +1,41 @@
+import React from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Trophy, Heart, Rocket, Medal, Activity, MessageSquare, Users, Brain, GitFork, Star, TrendingUp, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useWebSocket } from "@/hooks/use-websocket";
 
-export default function CommunitySection() {
-  const { data: leaderboard } = useQuery({
-    queryKey: ["/api/users/leaderboard"],
-  });
+// Define interfaces for the data structures
+interface User {
+  id: string;
+  username: string;
+  region: string;
+  karmaPoints: number;
+  // Add other relevant fields if necessary, e.g., avatarUrl
+}
 
-  const { data: achievements } = useQuery({
-    queryKey: ["/api/achievements"],
+interface AchievementFromAPI { // Renamed to avoid conflict with local recentAchievementsDisplay
+  id: string;
+  name: string;
+  description: string;
+  // Add other relevant fields
+}
+
+export default function CommunitySection() {
+  const { data: leaderboardData } = useQuery<{ users: User[] }>({ 
+    queryKey: ["/api/users/leaderboard"],
+    // queryFn: async () => fetch("/api/users/leaderboard").then(res => res.json()) // Example queryFn
   });
+  const leaderboard: User[] = leaderboardData?.users || []; 
+
+  const { data: achievementsAPIData } = useQuery<{ achievements: AchievementFromAPI[] }>({ 
+    queryKey: ["/api/achievements"],
+    // queryFn: async () => fetch("/api/achievements").then(res => res.json()) // Example queryFn
+  });
+  // const achievementsFromAPI: AchievementFromAPI[] = achievementsAPIData?.achievements || []; // If you need to use this
 
   // Subscribe to real-time updates
   const { isConnected } = useWebSocket();
@@ -22,21 +46,21 @@ export default function CommunitySection() {
     knowledgeShared: 3456,
   };
 
-  const recentAchievements = [
+  const recentAchievementsDisplay = [ 
     {
-      icon: "fas fa-trophy",
+      icon: <Trophy className="h-8 w-8 text-[hsl(var(--cyber-cyan))]" />,
       name: "Cultural Bridge Builder",
       description: "Created solutions for 5+ regional languages",
       color: "text-yellow-400"
     },
     {
-      icon: "fas fa-heart",
+      icon: <Heart className="h-8 w-8 text-[hsl(var(--royal-purple))]" />,
       name: "Community Champion",
       description: "Helped 100+ developers this month",
       color: "text-red-400"
     },
     {
-      icon: "fas fa-rocket",
+      icon: <Rocket className="h-8 w-8 text-[hsl(var(--vibrant-orange))]" />,
       name: "Innovation Pioneer",
       description: "First to implement new AI features",
       color: "text-blue-400"
@@ -100,8 +124,8 @@ export default function CommunitySection() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {leaderboard?.length ? (
-                    leaderboard.slice(0, 5).map((user, index) => (
+                  {leaderboard.length > 0 ? (
+                    leaderboard.slice(0, 5).map((user: User, index: number) => ( 
                       <motion.div 
                         key={user.id}
                         className="leaderboard-entry"
@@ -238,15 +262,15 @@ export default function CommunitySection() {
               <Card className="holographic-card border-[hsl(var(--border))]">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <i className="fas fa-medal text-yellow-400 mr-3"></i>
+                    <Medal className="text-yellow-400 mr-3 h-6 w-6" />
                     Recent Achievements
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {recentAchievements.map((achievement, index) => (
+                    {recentAchievementsDisplay.map((achievement, index) => ( 
                       <motion.div 
-                        key={achievement.name}
+                        key={achievement.name} 
                         className="p-4 glass-morphism rounded-lg"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -254,7 +278,7 @@ export default function CommunitySection() {
                         viewport={{ once: true }}
                       >
                         <div className="flex items-center space-x-3 mb-2">
-                          <i className={`${achievement.icon} ${achievement.color}`}></i>
+                          {achievement.icon}
                           <span className="font-semibold">{achievement.name}</span>
                         </div>
                         <p className="text-sm text-gray-400">{achievement.description}</p>
@@ -309,7 +333,7 @@ export default function CommunitySection() {
               <Card className="holographic-card border-[hsl(var(--border))]">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <i className="fas fa-pulse text-[hsl(var(--cyber-cyan))] mr-3"></i>
+                    <Activity className="text-[hsl(var(--cyber-cyan))] mr-3 h-6 w-6" />
                     Live Activity
                   </CardTitle>
                 </CardHeader>

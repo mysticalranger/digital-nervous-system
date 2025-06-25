@@ -1,231 +1,227 @@
+import { useState } from 'react';
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Bot, Award, Languages, LineChart, ShieldCheck, Users, Zap, Brain, GitFork, Scale, ArrowRight, Play, Code2, Database, Cloud } from "lucide-react";
+import CulturalSentimentDemo from "./cultural-sentiment-demo";
 
-const features = [
+interface Feature {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  status: 'live' | 'beta' | 'coming-soon';
+  category: 'ai' | 'platform' | 'developer' | 'analytics';
+  marketRelevance: string;
+  indianUseCase: string;
+  demoComponent?: React.ComponentType;
+}
+
+const features: Feature[] = [
   {
-    icon: "fas fa-robot",
-    title: "Jarvis-For-Bharat",
-    description: "Auto-generate India-first solutions using deep cultural context understanding and real-time regulatory intelligence across all 22 regional languages.",
-    gradient: "from-[hsl(var(--vibrant-orange))] to-[hsl(var(--cyber-cyan))]",
-    capabilities: [
-      "22 Regional sentiment pattern analysis",
-      "Predictive regulatory change detection",
-      "UPI-first monetization strategies"
-    ]
-  },
-  {
-    icon: "fas fa-award",
-    title: "Karma Engine",
-    description: "Transform social impact into tangible rewards through dynamic difficulty adjustment and community-validated achievement protocols.",
-    gradient: "from-[hsl(var(--royal-purple))] to-[hsl(var(--cyber-cyan))]",
-    capabilities: [
-      "Addiction-weighted achievement scaling",
-      "Community validation consensus",
-      "Festival-aware reward distribution"
-    ]
-  },
-  {
-    icon: "fas fa-language",
-    title: "Multi-Lingual AI",
-    description: "Deploy AI solutions in 22+ Indian languages with cultural context awareness and regional sentiment analysis.",
-    gradient: "from-[hsl(var(--cyber-cyan))] to-[hsl(var(--royal-purple))]",
-  },
-  {
-    icon: "fas fa-chart-line",
-    title: "Real-Time Analytics",
-    description: "Monitor your AI performance with live dashboards and predictive insights tailored for Indian markets.",
-    gradient: "from-[hsl(var(--royal-purple))] to-[hsl(var(--vibrant-orange))]",
-  },
-  {
-    icon: "fas fa-shield-alt",
-    title: "Regulatory Compliance",
-    description: "Built-in compliance with PDPL, GST, and RBI regulations. Auto-update with changing policies.",
-    gradient: "from-[hsl(var(--vibrant-orange))] to-[hsl(var(--cyber-cyan))]",
-  },
-  {
-    icon: "fas fa-mobile-alt",
-    title: "UPI-First Integration",
-    description: "Seamless payment integration with UPI, digital wallets, and regional banking systems.",
-    gradient: "from-[hsl(var(--cyber-cyan))] to-[hsl(var(--royal-purple))]",
+    id: 'cultural-sentiment',
+    title: "Cultural Sentiment Analysis",
+    description: "AI-powered analysis that understands emotions, cultural nuances, and sentiment in Indian communication patterns across multiple languages",
+    icon: <Brain className="h-8 w-8 text-purple-500" />,
+    status: 'live',
+    category: 'ai',
+    marketRelevance: "Social media companies save 60% on content moderation costs with cultural-aware sentiment analysis",
+    indianUseCase: "Detects festival-related sentiment, regional pride, cultural sensitivities, and helps brands communicate better with Indian audiences",
+    demoComponent: () => <div>Cultural Sentiment Demo Component</div>
   }
 ];
 
-const additionalFeatures = [
-  {
-    icon: "fas fa-language",
-    title: "Vernacular Architecture",
-    description: "Self-aware systems that adapt to regional linguistic patterns and cultural contexts"
-  },
-  {
-    icon: "fas fa-users",
-    title: "Community Symbiosis",
-    description: "Algorithm-community integration that creates addictive, value-driven engagement loops"
-  },
-  {
-    icon: "fas fa-sync-alt",
-    title: "Self-Evolution",
-    description: "Autonomous feature proposal and deployment using cultural entropy analysis"
-  }
-];
+interface FeaturesGridProps {
+  selectedCategory: string;
+  onFeatureSelect: (feature: Feature) => void;
+}
+
+function FeaturesGrid({ selectedCategory, onFeatureSelect }: FeaturesGridProps) {
+  const filteredFeatures = selectedCategory === 'all' 
+    ? features 
+    : features.filter(f => f.category === selectedCategory);
+
+  const getStatusColor = (status: Feature['status']) => {
+    switch (status) {
+      case 'live': return 'bg-green-500/20 text-green-400 border-green-500/20';
+      case 'beta': return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/20';
+      case 'coming-soon': return 'bg-gray-500/20 text-gray-400 border-gray-500/20';
+    }
+  };
+
+  return (
+    <div className="grid lg:grid-cols-2 gap-8">
+      {filteredFeatures.map((feature, index) => (
+        <motion.div
+          key={feature.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <Card className="glass-morphism border-cyber-cyan/20 hover:border-cyber-cyan/40 transition-all duration-300 h-full">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  {feature.icon}
+                  <div>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                    <CardDescription className="mt-2">{feature.description}</CardDescription>
+                  </div>
+                </div>
+                <Badge className={getStatusColor(feature.status)}>
+                  {feature.status.replace('-', ' ')}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-cyber-cyan">💰 Market Impact</div>
+                <div className="text-sm text-gray-300">{feature.marketRelevance}</div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-royal-purple">🇮🇳 Indian Use Case</div>
+                <div className="text-sm text-gray-300">{feature.indianUseCase}</div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button 
+                  className="flex-1"
+                  onClick={() => onFeatureSelect(feature)}
+                  disabled={feature.status === 'coming-soon'}
+                >
+                  {feature.status === 'coming-soon' ? 'Coming Soon' : 'Try Demo'}
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+                {feature.status !== 'coming-soon' && (
+                  <Button variant="outline" size="icon">
+                    <Code2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
 
 export default function FeaturesSection() {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+
+  const categories = [
+    { id: 'all', label: 'All Features', icon: <Scale className="h-4 w-4" /> },
+    { id: 'ai', label: 'AI Models', icon: <Brain className="h-4 w-4" /> },
+    { id: 'platform', label: 'Platform', icon: <Database className="h-4 w-4" /> },
+    { id: 'analytics', label: 'Analytics', icon: <LineChart className="h-4 w-4" /> },
+    { id: 'developer', label: 'Developer Tools', icon: <Code2 className="h-4 w-4" /> },
+  ];
+
+  // If a feature is selected, show its demo
+  if (selectedFeature) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="sticky top-0 bg-background/80 backdrop-blur border-b border-gray-800 z-10">
+          <div className="max-w-7xl mx-auto px-6 py-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setSelectedFeature(null)}
+              className="glass-morphism"
+            >
+              ← Back to Features
+            </Button>
+          </div>
+        </div>
+        
+        <div className="py-10">
+          {selectedFeature.id === 'cultural-sentiment' && <CulturalSentimentDemo />}
+          {selectedFeature.id !== 'cultural-sentiment' && (
+            <div className="max-w-4xl mx-auto text-center p-20">
+              <h2 className="text-3xl font-bold mb-4">{selectedFeature.title}</h2>
+              <p className="text-xl text-gray-300 mb-8">{selectedFeature.description}</p>
+              <Badge className="bg-yellow-500/20 text-yellow-400">Demo Coming Soon</Badge>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <section id="features" className="py-20 px-6">
+    <section className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
-        <motion.div 
-          className="text-center mb-16"
+        {/* Header */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-16"
         >
-          <h3 className="text-5xl font-bold mb-6">
-            Core <span className="gradient-text">Neural Components</span>
-          </h3>
+          <h1 className="text-5xl font-bold mb-6">
+            Platform <span className="gradient-text">Features</span>
+          </h1>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Revolutionary AI systems designed specifically for India's diverse technological and cultural landscape
+            Comprehensive AI solutions designed specifically for the Indian market. 
+            Each feature is built with cultural understanding and regional needs in mind.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-12 mb-16">
-          {features.slice(0, 2).map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.2 }}
-              viewport={{ once: true }}
-            >
-              <Card className="holographic-card p-8 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 h-full">
-                <CardContent className="p-0">
-                  <div className="flex items-center mb-6">
-                    <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center mr-4`}>
-                      <i className={`${feature.icon} text-white text-2xl`}></i>
-                    </div>
-                    <h4 className="text-2xl font-bold">{feature.title}</h4>
-                  </div>
-                  
-                  <p className="text-gray-300 mb-6">
-                    {feature.description}
-                  </p>
-                  
-                  {feature.capabilities && (
-                    <div className="space-y-3 mb-6">
-                      {feature.capabilities.map((capability, idx) => (
-                        <div key={idx} className="flex items-center text-sm">
-                          <i className="fas fa-check-circle text-green-400 mr-3"></i>
-                          <span>{capability}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {index === 0 && (
-                    <div className="mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
-                        alt="Interactive dashboard with data visualization" 
-                        className="w-full h-48 object-cover rounded-xl mb-6" 
-                      />
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-300">Regional Sentiment Analysis</span>
-                          <div className="w-32 h-2 bg-gray-700 rounded-full">
-                            <div className="progress-bar w-24 h-2 rounded-full"></div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-300">Regulatory Prediction</span>
-                          <div className="w-32 h-2 bg-gray-700 rounded-full">
-                            <div className="progress-bar w-28 h-2 rounded-full"></div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-300">UPI Integration Score</span>
-                          <div className="w-32 h-2 bg-gray-700 rounded-full">
-                            <div className="progress-bar w-30 h-2 rounded-full"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {index === 1 && (
-                    <div className="mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=400" 
-                        alt="Modern collaborative tech workspace" 
-                        className="w-full h-48 object-cover rounded-xl mb-6" 
-                      />
-                      <div className="bg-white bg-opacity-5 p-4 rounded-lg mb-4">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Current Karma Level</span>
-                          <span className="text-[hsl(var(--royal-purple))] font-semibold">Level 7</span>
-                        </div>
-                        <div className="w-full bg-gray-700 rounded-full h-3">
-                          <div className="progress-bar h-3 rounded-full" style={{ width: "75%" }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  <Button className={`w-full bg-gradient-to-r ${feature.gradient} py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300`}>
-                    {index === 0 ? "Experience Jarvis Demo" : "View Karma Dashboard"}
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Additional Features Grid */}
-        <motion.div 
-          className="grid md:grid-cols-3 gap-8"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
+        {/* Category Filter */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap justify-center gap-4 mb-12"
         >
-          {additionalFeatures.map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              className="glass-morphism p-6 rounded-xl text-center hover:bg-white hover:bg-opacity-10 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300 }}
+          {categories.map(category => (
+            <Button
+              key={category.id}
+              variant={selectedCategory === category.id ? "default" : "outline"}
+              className={`glass-morphism ${
+                selectedCategory === category.id 
+                  ? 'bg-cyber-cyan/20 border-cyber-cyan text-cyber-cyan' 
+                  : 'hover:border-cyber-cyan/40'
+              }`}
+              onClick={() => setSelectedCategory(category.id)}
             >
-              <i className={`${feature.icon} text-4xl text-[hsl(var(--cyber-cyan))] mb-4`}></i>
-              <h5 className="text-xl font-semibold mb-3">{feature.title}</h5>
-              <p className="text-gray-300 text-sm">{feature.description}</p>
-            </motion.div>
+              {category.icon}
+              {category.label}
+            </Button>
           ))}
         </motion.div>
 
-        {/* Main Features Grid */}
-        <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16"
+        {/* Features Grid */}
+        <FeaturesGrid 
+          selectedCategory={selectedCategory}
+          onFeatureSelect={setSelectedFeature}
+        />
+
+        {/* Market Insights */}
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          viewport={{ once: true }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-20 text-center"
         >
-          {features.slice(2).map((feature, index) => (
-            <motion.div
-              key={feature.title}
-              className="glass-morphism p-8 rounded-2xl hover:bg-white hover:bg-opacity-10 transition-all duration-300 transform hover:scale-105"
-              whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-xl flex items-center justify-center mb-6`}>
-                <i className={`${feature.icon} text-2xl text-white`}></i>
+          <Card className="glass-morphism border-royal-purple/20 bg-gradient-to-r from-royal-purple/5 to-cyber-cyan/5">
+            <CardContent className="p-8">
+              <h3 className="text-2xl font-bold mb-4">🇮🇳 Built for Bharat's Digital Future</h3>
+              <div className="grid md:grid-cols-3 gap-6 text-center">
+                <div>
+                  <div className="text-3xl font-bold text-cyber-cyan">₹2,000Cr+</div>
+                  <div className="text-sm text-gray-400">AI Market Opportunity in India</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-royal-purple">22+</div>
+                  <div className="text-sm text-gray-400">Official Languages Supported</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-vibrant-orange">1.4B</div>
+                  <div className="text-sm text-gray-400">People Ready for Digital AI</div>
+                </div>
               </div>
-              <h3 className="text-xl font-bold mb-4 text-white">{feature.title}</h3>
-              <p className="text-gray-400 mb-4">{feature.description}</p>
-              <button className="text-[hsl(var(--cyber-cyan))] hover:text-[hsl(var(--royal-purple))] transition-colors">
-                Learn More <i className="fas fa-arrow-right ml-1"></i>
-              </button>
-            </motion.div>
-          ))}
+            </CardContent>
+          </Card>
         </motion.div>
       </div>
     </section>

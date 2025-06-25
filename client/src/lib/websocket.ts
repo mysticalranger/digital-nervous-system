@@ -14,7 +14,12 @@ export class WebSocketManager {
   private connect() {
     try {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const wsUrl = `${protocol}//${window.location.host}/ws`;
+      const host = window.location.hostname;
+      // Always use port 5000 for WebSocket connection
+      const port = "5000";
+      const wsUrl = `${protocol}//${host}:${port}/ws`;
+      
+      console.log("Attempting to connect to WebSocket:", wsUrl);
       
       this.ws = new WebSocket(wsUrl);
       
@@ -55,7 +60,8 @@ export class WebSocketManager {
         this.connect();
       }, this.reconnectInterval);
     } else {
-      console.error("Max reconnection attempts reached");
+      console.log("Max reconnection attempts reached, WebSocket will operate in fallback mode");
+      // Don't throw error, just log and continue without websocket
     }
   }
 

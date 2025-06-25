@@ -1,4 +1,8 @@
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Link } from "wouter";
+import { Twitter, Github, Linkedin, Brain, Play, CalendarDays } from 'lucide-react';
 
 export default function Footer() {
   const footerSections = [
@@ -35,9 +39,9 @@ export default function Footer() {
   ];
 
   const socialLinks = [
-    { icon: "fab fa-twitter", href: "#" },
-    { icon: "fab fa-github", href: "#" },
-    { icon: "fab fa-linkedin", href: "#" }
+    { icon: <Twitter className="h-5 w-5" />, href: "#", name: "Twitter" },
+    { icon: <Github className="h-5 w-5" />, href: "#", name: "GitHub" },
+    { icon: <Linkedin className="h-5 w-5" />, href: "#", name: "LinkedIn" }
   ];
 
   return (
@@ -55,7 +59,12 @@ export default function Footer() {
               <div className="w-10 h-10 bg-gradient-to-r from-[hsl(var(--vibrant-orange))] to-[hsl(var(--cyber-cyan))] rounded-lg flex items-center justify-center">
                 <i className="fas fa-brain text-white text-xl"></i>
               </div>
-              <h5 className="text-2xl font-bold gradient-text">Digital Swameshtra</h5>
+              <Link href="/">
+                <a className="flex items-center space-x-2 group">
+                  <Brain className="h-8 w-8 text-[hsl(var(--cyber-cyan))] group-hover:animate-pulse" /> {/* Replaced fas fa-brain */}
+                  <span className="text-2xl font-bold gradient-text">Digital Swameshtra</span>
+                </a>
+              </Link>
             </div>
             <p className="text-gray-400 mb-6">
               Building India's AI-powered digital nervous system through culturally-conscious development.
@@ -69,7 +78,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <i className={social.icon}></i>
+                  {social.icon}
                 </motion.a>
               ))}
             </div>
@@ -148,7 +157,7 @@ export default function Footer() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <i className="fas fa-play mr-2"></i>
+              <Play className="mr-2 h-4 w-4" /> {/* Replaced fas fa-play */}
               Start Building Now
             </motion.button>
             <motion.button 
@@ -156,7 +165,7 @@ export default function Footer() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <i className="fas fa-calendar mr-2"></i>
+              <CalendarDays className="mr-2 h-4 w-4" /> {/* Replaced fas fa-calendar */}
               Schedule Demo
             </motion.button>
           </div>

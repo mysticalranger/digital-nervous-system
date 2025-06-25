@@ -75,6 +75,7 @@
 @layer components {
   .glass-morphism {
     background: hsla(0, 0%, 100%, 0.05);
+    -webkit-backdrop-filter: blur(10px); /* Safari prefix */
     backdrop-filter: blur(10px);
     border: 1px solid hsla(0, 0%, 100%, 0.1);
   }
@@ -90,6 +91,7 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    /* text-fill-color: transparent; /* Standard property, -webkit- is for older browsers */
   }
 
   .glow-orange {
@@ -154,6 +156,7 @@
       hsla(var(--cyber-cyan), 0.1) 0%,
       hsla(var(--royal-purple), 0.1) 50%,
       hsla(var(--vibrant-orange), 0.1) 100%);
+    -webkit-backdrop-filter: blur(15px); /* Safari prefix */
     backdrop-filter: blur(15px);
     border: 1px solid hsla(var(--cyber-cyan), 0.3);
     position: relative;
@@ -179,13 +182,149 @@
   }
 
   .interactive-button {
-    @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105;
+    @apply px-6 py-3 rounded-lg font-semibold; /* Removed redundant transition-all, duration, transform, hover:scale as they are handled below or in ::before */
     background: linear-gradient(45deg, hsl(var(--vibrant-orange)), hsl(var(--cyber-cyan)));
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .interactive-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
+    transition: left 0.3s ease;
+    z-index: 0; /* Ensure gradient is behind text */
+  }
+
+  .interactive-button:hover::before {
+    left: 0;
   }
 
   .interactive-button:hover {
-    background: linear-gradient(45deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
-    box-shadow: 0 8px 25px hsla(var(--cyber-cyan), 0.4);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 25px hsla(var(--cyber-cyan), 0.4);
+  }
+  
+  /* Ensure text/content inside button is above the ::before pseudo-element */
+  .interactive-button > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Dashboard cards */
+  .dashboard-card {
+    @apply metric-card; /* metric-card already has glass-morphism and transitions */
+    /* transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Already in metric-card via @apply */
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsla(var(--cyber-cyan), 0.1), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .dashboard-card:hover::before {
+    left: 100%;
+  }
+
+  .dashboard-card:hover {
+    /* metric-card already has hover:scale-105. You can add or override translateY here */
+    transform: translateY(-6px) scale(1.03); /* Adjusted scale to be slightly different if intended */
+    box-shadow: 0 25px 50px hsla(var(--cyber-cyan), 0.2), 0 0 30px hsla(var(--cyber-cyan), 0.1);
+  }
+
+  /* Activity feed items */
+  .activity-item {
+    @apply flex items-center space-x-3 p-3 rounded-lg;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+
+  .activity-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
+    transition: width 0.3s ease;
+    transform: translateY(-50%);
+  }
+
+  .activity-item:hover::before {
+    width: 100%;
+  }
+
+  .activity-item:hover {
+    background: hsla(var(--cyber-cyan), 0.1);
+    transform: translateX(8px);
+    /* padding-left: 1rem; /* This might cause a jump, consider if needed or adjust spacing */
+  }
+
+  /* Leaderboard entries */
+  .leaderboard-entry {
+    @apply flex items-center justify-between p-4 glass-morphism rounded-xl;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    border: 1px solid transparent; /* Start with transparent border to avoid layout shift */
+  }
+
+  .leaderboard-entry:hover {
+    background: hsla(var(--royal-purple), 0.15);
+    transform: scale(1.03) translateY(-2px);
+    border-color: hsla(var(--royal-purple), 0.3); /* Change border color on hover */
+    box-shadow: 0 15px 30px hsla(var(--royal-purple), 0.2);
+  }
+
+  /* Magnetic effect for important elements */
+  .magnetic-hover {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .magnetic-hover:hover {
+    transform: scale(1.05);
+  }
+
+  /* Parallax scroll effect */
+  .parallax-bg {
+    transform: translateZ(0); /* Promotes element to its own compositing layer */
+    will-change: transform; /* Hint to browser for optimization */
+  }
+
+  /* Form inputs */
+  .futuristic-input {
+    @apply bg-white bg-opacity-5 border border-white border-opacity-20 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--cyber-cyan))] transition-all duration-300;
+    /* Ensure ring color uses HSL variable correctly */
+  }
+
+  .futuristic-input:focus {
+    background: hsla(var(--cyber-cyan), 0.1);
+    box-shadow: 0 0 20px hsla(var(--cyber-cyan), 0.3);
+    border-color: hsl(var(--cyber-cyan));
+  }
+
+  /* Loading animations */
+  .loading-pulse {
+    animation: loading-pulse 1.5s ease-in-out infinite;
+  }
+
+  /* Achievement badges */
+  .achievement-badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+    background: linear-gradient(45deg, hsl(var(--vibrant-orange)), hsl(var(--cyber-cyan)));
   }
 }
 
@@ -342,161 +481,6 @@
   }
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--muted));
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, hsl(var(--royal-purple)), hsl(var(--vibrant-orange)));
-}
-
-/* Interactive dashboard elements */
-.dashboard-card {
-  @apply metric-card;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.dashboard-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, hsla(var(--cyber-cyan), 0.1), transparent);
-  transition: left 0.6s ease;
-}
-
-.dashboard-card:hover::before {
-  left: 100%;
-}
-
-.dashboard-card:hover {
-  transform: translateY(-6px) scale(1.03);
-  box-shadow: 0 25px 50px hsla(var(--cyber-cyan), 0.2), 0 0 30px hsla(var(--cyber-cyan), 0.1);
-}
-
-/* Activity feed items */
-.activity-item {
-  @apply flex items-center space-x-3 p-3 rounded-lg;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-}
-
-.activity-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
-  transition: width 0.3s ease;
-  transform: translateY(-50%);
-}
-
-.activity-item:hover::before {
-  width: 100%;
-}
-
-.activity-item:hover {
-  background: hsla(var(--cyber-cyan), 0.1);
-  transform: translateX(8px);
-  padding-left: 1rem;
-}
-
-/* Leaderboard entries */
-.leaderboard-entry {
-  @apply flex items-center justify-between p-4 glass-morphism rounded-xl;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  border: 1px solid transparent;
-}
-
-.leaderboard-entry:hover {
-  background: hsla(var(--royal-purple), 0.15);
-  transform: scale(1.03) translateY(-2px);
-  border: 1px solid hsla(var(--royal-purple), 0.3);
-  box-shadow: 0 15px 30px hsla(var(--royal-purple), 0.2);
-}
-
-/* Enhanced button interactions */
-.interactive-button {
-  @apply px-6 py-3 rounded-lg font-semibold;
-  background: linear-gradient(45deg, hsl(var(--vibrant-orange)), hsl(var(--cyber-cyan)));
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.interactive-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(45deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
-  transition: left 0.3s ease;
-}
-
-.interactive-button:hover::before {
-  left: 0;
-}
-
-.interactive-button:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 10px 25px hsla(var(--cyber-cyan), 0.4);
-}
-
-.interactive-button span {
-  position: relative;
-  z-index: 1;
-}
-
-/* Magnetic effect for important elements */
-.magnetic-hover {
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.magnetic-hover:hover {
-  transform: scale(1.05);
-}
-
-/* Parallax scroll effect */
-.parallax-bg {
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-/* Form inputs */
-.futuristic-input {
-  @apply bg-white bg-opacity-5 border border-white border-opacity-20 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-all duration-300;
-}
-
-.futuristic-input:focus {
-  background: hsla(var(--cyber-cyan), 0.1);
-  box-shadow: 0 0 20px hsla(var(--cyber-cyan), 0.3);
-  border-color: hsl(var(--cyber-cyan));
-}
-
-/* Loading animations */
-.loading-pulse {
-  animation: loading-pulse 1.5s ease-in-out infinite;
-}
-
 @keyframes loading-pulse {
   0%, 100% {
     opacity: 1;
@@ -506,16 +490,31 @@
   }
 }
 
-/* Achievement badges */
-.achievement-badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
-  background: linear-gradient(45deg, hsl(var(--vibrant-orange)), hsl(var(--cyber-cyan)));
+/* Scrollbar styling */
+@layer utilities { /* Moved scrollbar to utilities layer or keep it global if preferred */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsl(var(--cyber-cyan)), hsl(var(--royal-purple)));
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, hsl(var(--royal-purple)), hsl(var(--vibrant-orange)));
+  }
 }
+
 
 /* Responsive typography */
 @media (max-width: 768px) {
   .gradient-text {
-    font-size: 2.5rem;
+    font-size: 2.5rem; /* Consider using Tailwind's responsive font sizes if possible for consistency */
   }
 }
 
@@ -535,5 +534,6 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    /* scroll-behavior: auto !important; /* Also consider scroll behavior */
   }
 }

@@ -1,15 +1,48 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import { Mistral } from "@mistralai/mistralai";
-import { storage } from "./storage";
-import { insertProjectSchema, insertUserSchema, insertCommunityActivitySchema } from "@shared/schema";
+// import { Mistral } from "@mistralai/mistralai"; // Using Gemini as primary AI
+import { storage } from "./fileStorage";
 import { z } from "zod";
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
-// Using Mistral AI for free tier compatibility
-const mistral = new Mistral({ 
-  apiKey: process.env.MISTRAL_API_KEY || "default_key" 
+// Validation schemas
+const insertUserSchema = z.object({
+  username: z.string().min(3).max(50),
+  email: z.string().email(),
+  region: z.string().min(1),
+  language: z.string().default("en"),
 });
+
+const insertProjectSchema = z.object({
+  title: z.string().min(3).max(100),
+  description: z.string().min(10),
+  userId: z.string(),
+  targetRegion: z.string(),
+  aiComplexity: z.string(),
+  culturalScore: z.number().optional(),
+});
+
+const insertCommunityActivitySchema = z.object({
+  userId: z.string(),
+  activityType: z.string(),
+  description: z.string(),
+  karmaEarned: z.number().default(0),
+});
+
+// Using Gemini AI as primary (FREE) for cultural analysis
+// const mistral = new Mistral({ 
+//   apiKey: process.env.MISTRAL_API_KEY || "default_key" 
+// });
+
+const SECRET = process.env.SESSION_SECRET || 'default_secret_change_me';
+const EXPIRES_IN = '7d';
+
+// Helper to generate token (updated for file storage)
+function generateAppToken(user: { id: string; username: string; }) {
+  return jwt.sign({ id: user.id, username: user.username }, SECRET, { expiresIn: EXPIRES_IN });
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Users endpoints
@@ -25,8 +58,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/users", async (req, res) => {
     try {
-      const userData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(userData);
+      const userDataSchema = insertUserSchema.extend({
+        password: z.string().min(6, "Password must be at least 6 characters"),
+      });
+      const validatedData = userDataSchema.parse(req.body);
+      
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+      
+      const user = await storage.createUser({
+        username: validatedData.username,
+        email: validatedData.email,
+        passwordHash: hashedPassword,
+        region: validatedData.region,
+        language: validatedData.language,
+      });
       res.status(201).json(user);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -34,6 +79,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ error: "Failed to create user" });
       }
+    }
+  });
+
+  // Authentication endpoint
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      // Validate input (username, email, password, region, language)
+      // The auth.tsx sends: { username, email, password, region: 'India', language: 'en' }
+      const registrationDataSchema = insertUserSchema.extend({
+        password: z.string().min(6, "Password must be at least 6 characters"),
+      });
+      const validatedData = registrationDataSchema.parse(req.body);
+
+      const existingUser = await storage.getUserByUsername(validatedData.username);
+      if (existingUser) {
+        return res.status(409).json({ message: 'Username already exists' });
+      }
+      
+      // Check for existing email
+      const existingEmail = await storage.getUserByEmail(validatedData.email);
+      if (existingEmail) {
+        return res.status(409).json({ message: 'Email already registered' });
+      }
+      
+      const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+
+      const newUser = await storage.createUser({
+        username: validatedData.username,
+        email: validatedData.email,
+        passwordHash: hashedPassword,
+        region: validatedData.region,
+        language: validatedData.language,
+      });
+
+      const token = generateAppToken(newUser);
+      res.status(201).json({ token, user: { id: newUser.id, username: newUser.username, email: newUser.email } });
+
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation failed", errors: error.errors });
+      }
+      console.error("Registration error:", error);
+      res.status(500).json({ message: 'Registration failed' });
+    }
+  });
+
+  // Login endpoint
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const loginDataSchema = z.object({
+        username: z.string(),
+        password: z.string(),
+      });
+      const validatedData = loginDataSchema.parse(req.body);
+
+      const user = await storage.getUserByUsername(validatedData.username);
+      if (!user || !user.passwordHash) { // Check for user and passwordHash
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      const isPasswordMatch = await bcrypt.compare(validatedData.password, user.passwordHash);
+      if (!isPasswordMatch) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      const token = generateAppToken(user);
+      res.status(200).json({ token, user: { id: user.id, username: user.username, email: user.email } });
+
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation failed", errors: error.errors });
+      }
+      console.error("Login error:", error);
+      res.status(500).json({ message: 'Login failed' });
     }
   });
 
@@ -54,7 +173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create community activity
       await storage.createCommunityActivity({
-        userId: project.userId,
+        userId: project.userId.toString(),
         activityType: "project_created",
         description: `New project created: ${project.title}`,
         karmaEarned: 50,
@@ -72,7 +191,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/projects/user/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = req.params.userId;
       const projects = await storage.getProjectsByUser(userId);
       res.json(projects);
     } catch (error) {
@@ -99,8 +218,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Project description is required" });
       }
 
-      // Check if Mistral API key is available
-      if (!process.env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY === "default_key") {
+      // Check if AI API keys are available (prioritize Gemini over Mistral)
+      if (!process.env.GEMINI_API_KEY && (!process.env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY === "default_key")) {
         // Fallback to structured response based on input
         const generatedProject = {
           title: `AI-Powered ${description.split(' ').slice(0, 3).join(' ')} Solution`,
@@ -162,15 +281,43 @@ Respond with JSON in this exact format:
   "karmaReward": 150
 }`;
 
-      const response = await mistral.chat.complete({
-        model: "mistral-small",
-        messages: [{ role: "user", content: prompt }]
-      });
+      // Try Gemini first, then fallback to structured response
+      let generatedProject;
+      try {
+        if (process.env.GEMINI_API_KEY) {
+          // Use Gemini AI for project generation
+          const { GoogleGenerativeAI } = await import('@google/generative-ai');
+          const gemini = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+          const model = gemini.getGenerativeModel({ model: "gemini-1.5-flash" });
+          
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          const responseText = response.text();
+          
+          // Extract JSON from response
+          const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            generatedProject = JSON.parse(jsonMatch[0]);
+          }
+        }
+      } catch (aiError) {
+        console.error("Gemini AI generation error:", aiError);
+      }
 
-      const content = typeof response.choices[0].message.content === 'string' 
-        ? response.choices[0].message.content 
-        : JSON.stringify(response.choices[0].message.content);
-      const generatedProject = JSON.parse(content || "{}");
+      // If no AI result, use fallback
+      if (!generatedProject) {
+        generatedProject = {
+          title: `Intelligent ${description.split(' ').slice(0, 3).join(' ')} Platform`,
+          enhancedDescription: `A smart ${aiComplexity.toLowerCase()} solution for ${targetRegion}`,
+          culturalScore: 75,
+          recommendedLanguages: ["Hindi", "English"],
+          technicalStack: ["React", "Node.js", "MongoDB"],
+          culturalConsiderations: ["Cultural awareness"],
+          implementationSteps: ["Planning", "Development", "Testing", "Deployment"],
+          estimatedTimeline: "6-8 weeks",
+          karmaReward: 150
+        };
+      }
       
       res.json(generatedProject);
     } catch (error) {
@@ -211,7 +358,7 @@ Respond with JSON in this exact format:
 
   app.get("/api/achievements/user/:userId", async (req, res) => {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = req.params.userId;
       const userAchievements = await storage.getUserAchievements(userId);
       res.json(userAchievements);
     } catch (error) {
@@ -229,80 +376,292 @@ Respond with JSON in this exact format:
     }
   });
 
-  // Cultural analysis endpoint
+  // Cultural analysis endpoint with revolutionary AI (Gemini Priority)
   app.post("/api/ai/analyze-cultural-context", async (req, res) => {
     try {
       const { text, region, language } = req.body;
 
-      // Check if Mistral API key is available
-      if (!process.env.MISTRAL_API_KEY || process.env.MISTRAL_API_KEY === "default_key") {
-        // Fallback to structured analysis based on region and content
-        const analysis = {
-          culturalScore: Math.floor(Math.random() * 20) + 80, // 80-99
-          sentimentAnalysis: text.toLowerCase().includes('good') || text.toLowerCase().includes('great') ? "positive" :
-                           text.toLowerCase().includes('bad') || text.toLowerCase().includes('poor') ? "negative" : "neutral",
-          culturalInsights: region === "South India" ? [
-            "Strong emphasis on traditional values and education",
-            "Technology adoption varies by state and urban-rural divide",
-            "Regional language preferences are crucial for engagement"
-          ] : region === "North India" ? [
-            "Family-oriented decision making patterns",
-            "Festival seasons significantly impact business cycles",
-            "Hindi language dominance with English for business"
-          ] : [
-            "Diverse cultural landscape requires localized approach",
-            "Regional languages essential for authentic connection",
-            "Cultural sensitivity paramount for acceptance"
-          ],
-          recommendations: [
-            "Incorporate regional language support",
-            "Consider local festival calendars for timing",
-            "Test with regional focus groups",
-            "Ensure cultural appropriateness in messaging"
-          ],
-          riskFactors: [],
-          confidence: 0.85
-        };
-        
-        return res.json(analysis);
+      // Use revolutionary advanced cultural analyzer with Gemini as PRIMARY (FREE), Mistral as fallback
+      if (process.env.GEMINI_API_KEY || (process.env.MISTRAL_API_KEY && process.env.MISTRAL_API_KEY !== "default_key")) {
+        try {
+          const { AdvancedCulturalAnalyzer } = await import('./ai-engine/advanced-cultural-analyzer');
+          const analyzer = new AdvancedCulturalAnalyzer(
+            process.env.MISTRAL_API_KEY, 
+            process.env.GEMINI_API_KEY // Gemini as primary AI
+          );
+          const analysis = await analyzer.analyzeCulturalContext(text, region || "All India", language || "en");
+          
+          // Transform advanced analysis to match expected format while preserving extra data
+          const response = {
+            culturalScore: analysis.culturalScore,
+            sentimentAnalysis: analysis.sentimentAnalysis,
+            culturalInsights: analysis.culturalInsights,
+            recommendations: analysis.recommendations,
+            riskFactors: analysis.riskFactors,
+            confidence: analysis.confidence,
+            
+            // Revolutionary advanced features that make us unique in Indian market
+            advancedFeatures: {
+              codeMixingDetection: analysis.codeMixingDetection,
+              regionalNuances: analysis.regionalNuances,
+              festivalContext: analysis.festivalContext,
+              socialMediaVirality: analysis.socialMediaVirality,
+              brandSafetyScore: analysis.brandSafetyScore,
+              generationalSegment: analysis.generationalSegment,
+              economicSentiment: analysis.economicSentiment,
+              politicalNeutrality: analysis.politicalNeutrality
+            }
+          };
+          
+          console.log('🚀 Advanced Cultural AI Analysis completed with Gemini');
+          return res.json(response);
+        } catch (aiError) {
+          console.error("Advanced AI analysis failed, falling back to enhanced local analysis:", aiError);
+          // Fall back to enhanced local analysis
+        }
       }
 
-      const prompt = `Analyze the cultural context and sentiment of the following text for the ${region} region in ${language}:
-
-"${text}"
-
-Provide analysis considering:
-1. Regional cultural sensitivities
-2. Language-specific nuances
-3. Religious and social considerations
-4. Local business practices
-5. Regulatory implications
-
-Respond with JSON:
-{
-  "culturalScore": 92,
-  "sentimentAnalysis": "positive/neutral/negative",
-  "culturalInsights": ["insight1", "insight2"],
-  "recommendations": ["rec1", "rec2"],
-  "riskFactors": ["risk1", "risk2"],
-  "confidence": 0.95
-}`;
-
-      const response = await mistral.chat.complete({
-        model: "mistral-small",
-        messages: [{ role: "user", content: prompt }]
-      });
-
-      const content = typeof response.choices[0].message.content === 'string' 
-        ? response.choices[0].message.content 
-        : JSON.stringify(response.choices[0].message.content);
-      const analysis = JSON.parse(content || "{}");
-      res.json(analysis);
+      // Enhanced fallback analysis with Indian-specific algorithms
+      const analysis = generateLocalCulturalAnalysis(text, region, language);
+      return res.json(analysis);
     } catch (error) {
       console.error("Cultural analysis error:", error);
-      res.status(500).json({ error: "Failed to analyze cultural context" });
+      // Fallback to local analysis if AI fails
+      const fallbackAnalysis = generateLocalCulturalAnalysis(req.body.text, req.body.region, req.body.language);
+      res.json(fallbackAnalysis);
     }
   });
+
+  // Enhanced helper function for comprehensive cultural analysis
+  function generateLocalCulturalAnalysis(text: string, region: string, language: string) {
+    const lowerText = text.toLowerCase();
+    
+    // Enhanced sentiment keywords with Indian context
+    const positiveWords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'beautiful', 'love', 'happy', 'joy', 'celebration', 'festival', 'prosperity', 'blessed', 'namaste', 'hardik', 'shubh', 'accha', 'badiya', 'mast', 'zabardast', 'kamaal', 'superb', 'fantastic', 'awesome'];
+    const negativeWords = ['bad', 'terrible', 'horrible', 'hate', 'angry', 'sad', 'problem', 'issue', 'corrupt', 'traffic', 'pollution', 'expensive', 'ganda', 'bekaar', 'kharab', 'mushkil', 'pareshani', 'tension'];
+    const culturalWords = ['diwali', 'holi', 'eid', 'christmas', 'ganesh', 'durga', 'navratri', 'family', 'community', 'tradition', 'culture', 'respect', 'namaste', 'ji', 'bhai', 'didi', 'mata', 'pita', 'guru', 'sanskar', 'dharma', 'karma', 'bharat', 'hindustan'];
+    
+    // Code-mixing detection patterns
+    const hindiPatterns = ['hai', 'hoon', 'kar', 'ke', 'ki', 'ko', 'se', 'me', 'aur', 'ya', 'nahi', 'kya', 'kaise', 'kahan', 'kyun', 'ji', 'bhai', 'didi', 'yaar', 'arre', 'bas', 'bilkul'];
+    const tamilPatterns = ['enna', 'epdi', 'nalla', 'romba', 'paathukka', 'vanakkam', 'anna', 'akka', 'mama', 'thala'];
+    const kannadaPatterns = ['hegidira', 'chennagide', 'namaskara', 'anna', 'akka', 'guru'];
+    const teluguPatterns = ['ela', 'bagundi', 'namaste', 'anna', 'akka', 'mama'];
+    const gujaratiPatterns = ['kem', 'majama', 'namaste', 'bhai', 'ben'];
+    const punjabiPatterns = ['kiddan', 'changa', 'sat sri akal', 'veer', 'paaji'];
+    
+    // Regional slang and expressions
+    const mumbaiSlang = ['bc', 'yaar', 'bhai', 'mast', 'bindass', 'tapori', 'local', 'fast'];
+    const delhiSlang = ['yaar', 'bhai', 'kya baat', 'scene', 'paaji', 'sirji'];
+    const bangaloreSlang = ['machaa', 'guru', 'scene', 'boss', 'dude'];
+    const chennaiSlang = ['machaan', 'thala', 'mass', 'scene', 'boss'];
+    
+    // Advanced sentiment calculation with context
+    const positiveCount = positiveWords.filter(word => lowerText.includes(word)).length;
+    const negativeCount = negativeWords.filter(word => lowerText.includes(word)).length;
+    const culturalCount = culturalWords.filter(word => lowerText.includes(word)).length;
+    
+    // Code-mixing detection
+    const hindiCount = hindiPatterns.filter(word => lowerText.includes(word)).length;
+    const tamilCount = tamilPatterns.filter(word => lowerText.includes(word)).length;
+    const kannadaCount = kannadaPatterns.filter(word => lowerText.includes(word)).length;
+    const teluguCount = teluguPatterns.filter(word => lowerText.includes(word)).length;
+    const gujaratiCount = gujaratiPatterns.filter(word => lowerText.includes(word)).length;
+    const punjabiCount = punjabiPatterns.filter(word => lowerText.includes(word)).length;
+    
+    // Regional slang detection
+    const mumbaiCount = mumbaiSlang.filter(word => lowerText.includes(word)).length;
+    const delhiCount = delhiSlang.filter(word => lowerText.includes(word)).length;
+    const bangaloreCount = bangaloreSlang.filter(word => lowerText.includes(word)).length;
+    const chennaiCount = chennaiSlang.filter(word => lowerText.includes(word)).length;
+    
+    // Determine dominant language mix
+    const languageMix: { [key: string]: number } = {
+      hindi: hindiCount,
+      tamil: tamilCount,
+      kannada: kannadaCount,
+      telugu: teluguCount,
+      gujarati: gujaratiCount,
+      punjabi: punjabiCount
+    };
+    
+    const dominantLanguage = Object.entries(languageMix).reduce((a, b) => 
+      a[1] > b[1] ? a : b
+    )[0];
+    
+    // Enhanced sentiment analysis
+    let sentimentAnalysis: 'positive' | 'neutral' | 'negative' = 'neutral';
+    if (positiveCount > negativeCount) {
+      sentimentAnalysis = 'positive';
+    } else if (negativeCount > positiveCount) {
+      sentimentAnalysis = 'negative';
+    }
+    
+    // Dynamic cultural score calculation
+    let culturalScore = 70; // Base score
+    culturalScore += culturalCount * 5; // Cultural words boost
+    culturalScore += positiveCount * 2; // Positive sentiment boost
+    culturalScore -= negativeCount * 3; // Negative sentiment penalty
+    culturalScore += hindiCount * 1.5; // Hindi code-mixing bonus
+    culturalScore += Math.max(tamilCount, kannadaCount, teluguCount) * 2; // South Indian languages
+    culturalScore = Math.min(95, Math.max(30, culturalScore));
+    
+    // Generate comprehensive insights
+    const culturalInsights = [];
+    const recommendations = [];
+    const riskFactors = [];
+    
+    // Language mixing insights
+    if (hindiCount > 0 && language === 'en') {
+      culturalInsights.push("Code-mixing detected: English-Hindi blend common in urban India");
+      recommendations.push("Consider bilingual content strategy for better engagement");
+    }
+    
+    if (dominantLanguage !== 'hindi' && languageMix[dominantLanguage] > 2) {
+      culturalInsights.push(`Strong ${dominantLanguage} influence detected - regional targeting opportunity`);
+      recommendations.push(`Localize content for ${dominantLanguage}-speaking regions`);
+    }
+    
+    // Enhanced regional business insights
+    if (region === "South India") {
+      culturalInsights.push("Content aligns with South Indian communication patterns");
+      if (lowerText.includes('chennai') || lowerText.includes('bangalore') || lowerText.includes('kerala')) {
+        culturalInsights.push("Strong South Indian regional identity - high brand loyalty expected");
+        recommendations.push("Leverage regional pride and local partnerships for market penetration");
+      }
+      if (tamilCount > 0) {
+        culturalInsights.push("Tamil cultural elements detected - consider Tamil celebrity endorsements");
+        recommendations.push("Create Tamil-specific content variants for higher engagement");
+      }
+      if (bangaloreCount > 0) {
+        culturalInsights.push("Bangalore tech culture detected - focus on innovation messaging");
+        recommendations.push("Target IT professionals with productivity and tech-forward solutions");
+      }
+      if (culturalCount > 0) {
+        recommendations.push("Consider Tamil or Telugu translations for wider reach");
+      }
+    } else if (region === "North India") {
+      culturalInsights.push("Suitable for North Indian audience preferences");
+      if (lowerText.includes('delhi') || lowerText.includes('punjab') || lowerText.includes('namaste')) {
+        culturalInsights.push("North Indian cultural markers - traditional values with modern outlook");
+        recommendations.push("Balance traditional respect with contemporary lifestyle messaging");
+      }
+      if (punjabiCount > 0) {
+        culturalInsights.push("Punjabi cultural influence - celebration and prosperity themes work well");
+        recommendations.push("Use festival and family-oriented marketing strategies");
+      }
+      if (delhiCount > 0) {
+        culturalInsights.push("Delhi metro culture - aspirational and status-conscious audience");
+        recommendations.push("Emphasize premium positioning and social status benefits");
+      }
+      if (lowerText.includes('namaste') || lowerText.includes('ji')) {
+        culturalInsights.push("Appropriate formal tone for Hindi-speaking regions");
+      }
+      if (culturalCount > 0) {
+        recommendations.push("Hindi language content would resonate well");
+      }
+    } else if (region === "West India") {
+      culturalInsights.push("Business-friendly tone suitable for Western Indian markets");
+      if (mumbaiCount > 0) {
+        culturalInsights.push("Mumbai entrepreneurial spirit detected - business and hustle culture");
+        recommendations.push("Focus on time-saving, efficiency, and financial growth messaging");
+      }
+      if (gujaratiCount > 0) {
+        culturalInsights.push("Gujarati business community traits - value-for-money focus");
+        recommendations.push("Emphasize ROI, savings, and practical benefits in messaging");
+      }
+      if (lowerText.includes('mumbai') || lowerText.includes('business')) {
+        culturalInsights.push("Commercial context appropriate for Maharashtra/Gujarat");
+      }
+    }
+    
+    // Enhanced festival and seasonal context analysis
+    const currentMonth = new Date().getMonth();
+    const festivals = {
+      'diwali': { months: [9, 10], sentiment_boost: 15, business_impact: 'High spending season - premium products perform well' },
+      'holi': { months: [2, 3], sentiment_boost: 10, business_impact: 'Social sharing peak - viral marketing opportunity' },
+      'ganesh': { months: [7, 8], sentiment_boost: 12, business_impact: 'Community engagement high - local partnerships valuable' },
+      'eid': { months: [4, 5], sentiment_boost: 10, business_impact: 'Family and gifting focus - relationship marketing effective' },
+      'christmas': { months: [11], sentiment_boost: 8, business_impact: 'Cross-community appeal - inclusive messaging opportunity' },
+      'navratri': { months: [8, 9], sentiment_boost: 8, business_impact: 'Western India focus - regional marketing opportunity' }
+    };
+    
+    for (const [festival, data] of Object.entries(festivals)) {
+      if (lowerText.includes(festival)) {
+        culturalScore += data.sentiment_boost;
+        culturalInsights.push(`${festival.charAt(0).toUpperCase() + festival.slice(1)} context detected - ${data.business_impact}`);
+        
+        if (data.months.includes(currentMonth)) {
+          recommendations.push(`Perfect timing for ${festival} marketing campaigns - leverage seasonal sentiment`);
+        } else {
+          recommendations.push(`Plan ahead for ${festival} season - create evergreen content for reactivation`);
+        }
+      }
+    }
+    
+    // Business sentiment analysis for monetization
+    const businessKeywords = ['buy', 'purchase', 'price', 'cost', 'money', 'pay', 'expensive', 'cheap', 'affordable', 'discount', 'offer', 'deal', 'sale'];
+    const businessCount = businessKeywords.filter(word => lowerText.includes(word)).length;
+    
+    if (businessCount > 0) {
+      culturalInsights.push("Commercial intent detected - high conversion potential audience");
+      recommendations.push("Deploy targeted advertising and promotional content immediately");
+    }
+    
+    // Social media virality potential
+    const viralKeywords = ['share', 'tag', 'follow', 'like', 'comment', 'repost', 'viral', 'trending', 'story', 'status'];
+    const viralCount = viralKeywords.filter(word => lowerText.includes(word)).length;
+    
+    if (viralCount > 0) {
+      culturalInsights.push("High social sharing potential - viral marketing opportunity");
+      recommendations.push("Create shareable content variants and hashtag campaigns");
+    }
+    
+    // Enhanced risk assessment for brand safety
+    const sensitiveTopics = ['religion', 'politics', 'caste', 'beef', 'pork', 'alcohol', 'violence', 'protest'];
+    const riskKeywords = sensitiveTopics.filter(topic => lowerText.includes(topic));
+    
+    if (riskKeywords.length > 0) {
+      riskFactors.push(`Sensitive topics detected: ${riskKeywords.join(', ')} - proceed with cultural sensitivity`);
+      recommendations.push("Consult local cultural experts before content publication");
+    }
+    
+    if (negativeCount > 2) {
+      riskFactors.push("High negative sentiment - potential brand association risks");
+      recommendations.push("Consider crisis communication strategy if engaging with this content");
+    }
+    
+    if (culturalScore < 60) {
+      riskFactors.push("Low cultural alignment - may not resonate with Indian audiences");
+      recommendations.push("Localize content with Indian cultural elements before launch");
+    }
+    
+    // Default recommendations
+    if (culturalScore > 80) {
+      recommendations.push("High cultural resonance - suitable for broad Indian audiences");
+    } else if (culturalScore > 60) {
+      recommendations.push("Good cultural fit with minor localization improvements possible");
+    } else {
+      recommendations.push("Consider cultural adaptation for better audience connection");
+    }
+    
+    // Mixed language detection
+    const hindiWords = ['aur', 'hai', 'kar', 'ke', 'ki', 'ko', 'se', 'me', 'ji', 'bhai', 'didi'];
+    const hasHindi = hindiWords.some(word => lowerText.includes(word));
+    
+    if (hasHindi && language === 'en') {
+      culturalInsights.push("Code-mixing detected - natural for Indian digital communication");
+      recommendations.push("Mixed language approach resonates well with urban Indians");
+    }
+    
+    return {
+      culturalScore,
+      sentimentAnalysis,
+      culturalInsights: culturalInsights.length > 0 ? culturalInsights : ["Text analyzed for Indian cultural context"],
+      recommendations: recommendations.length > 0 ? recommendations : ["Content suitable for Indian audiences"],
+      riskFactors: riskFactors.length > 0 ? riskFactors : [],
+      confidence: Math.min(0.95, 0.75 + (culturalCount * 0.05))
+    };
+  }
 
   // Engagement API routes for addictive features
   app.get("/api/engagement/challenges", async (req, res) => {

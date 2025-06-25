@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { AreaChart, BarChart3, CalendarDays, CheckCircle2, ChevronDown, ChevronRight, CircleDollarSign, Clock, Cpu, FileText, Filter, Globe, HardDrive, Languages, Layers, LineChart, ListChecks, MessageSquare, PlusCircle, Search, Settings, Share2, ShieldCheck, Star, ThumbsUp, TrendingUp, Trophy, UploadCloud, UserCheck, Users, Zap, Download, Plus, Projector, Brain, Activity, Clock3, Bot, Loader2 } from 'lucide-react';
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -105,11 +108,11 @@ export default function AiDashboard() {
               </p>
             </div>
             <div className="flex space-x-4">
-              <Button variant="outline" className="glass-morphism hover:bg-white hover:bg-opacity-20">
-                <i className="fas fa-download mr-2"></i>Export Data
+              <Button variant="outline" className="futuristic-button border-[hsl(var(--cyber-cyan))] hover:bg-[hsl(var(--cyber-cyan))] hover:text-black">
+                <Download className="mr-2 h-4 w-4" />Export Data
               </Button>
-              <Button className="interactive-button">
-                <i className="fas fa-plus mr-2"></i>New Project
+              <Button className="futuristic-button bg-gradient-to-r from-[hsl(var(--cyber-cyan))] to-[hsl(var(--royal-purple))] hover:opacity-90">
+                <Plus className="mr-2 h-4 w-4" />New Project
               </Button>
             </div>
           </div>
@@ -130,7 +133,7 @@ export default function AiDashboard() {
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Active Projects</h5>
-                <i className="fas fa-project-diagram text-[hsl(var(--cyber-cyan))]"></i>
+                <Projector className="h-10 w-10 text-[hsl(var(--cyber-cyan))]" />
               </div>
               <div className="text-3xl font-bold text-[hsl(var(--cyber-cyan))] mb-2">
                 {metrics?.projectsCreated ? Math.floor(metrics.projectsCreated / 1000) : 12}
@@ -197,17 +200,7 @@ export default function AiDashboard() {
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Regional Impact</h5>
-                <motion.i 
-                  className="fas fa-globe-asia text-[hsl(var(--vibrant-orange))]"
-                  animate={{ 
-                    rotate: [0, 360],
-                  }}
-                  transition={{ 
-                    duration: 8,
-                    repeat: Infinity,
-                    ease: "linear"
-                  }}
-                />
+                <Globe className="h-4 w-4 text-[hsl(var(--vibrant-orange))]" />
               </div>
               <motion.div 
                 className="text-3xl font-bold text-[hsl(var(--vibrant-orange))] mb-2"
@@ -241,18 +234,7 @@ export default function AiDashboard() {
             >
               <div className="flex items-center justify-between mb-3">
                 <h5 className="text-lg font-semibold">Community Rank</h5>
-                <motion.i 
-                  className="fas fa-trophy text-yellow-400"
-                  animate={{ 
-                    y: [0, -5, 0],
-                    rotate: [0, 5, -5, 0]
-                  }}
-                  transition={{ 
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: 2
-                  }}
-                />
+                <Trophy className="h-4 w-4 text-yellow-400" />
               </div>
               <motion.div 
                 className="text-3xl font-bold text-yellow-400 mb-2"
@@ -279,7 +261,7 @@ export default function AiDashboard() {
             <Card className="glass-morphism border-[hsl(var(--border))]">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <i className="fas fa-chart-line text-[hsl(var(--cyber-cyan))] mr-3"></i>
+                  <LineChart className="text-[hsl(var(--cyber-cyan))] mr-3 h-5 w-5" />
                   AI Model Performance
                 </CardTitle>
               </CardHeader>
@@ -304,7 +286,7 @@ export default function AiDashboard() {
             <Card className="glass-morphism border-[hsl(var(--border))]">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <i className="fas fa-language text-[hsl(var(--royal-purple))] mr-3"></i>
+                  <Languages className="text-[hsl(var(--royal-purple))] mr-3 h-5 w-5" />
                   Regional Engagement
                 </CardTitle>
               </CardHeader>
@@ -349,7 +331,7 @@ export default function AiDashboard() {
           viewport={{ once: true }}
         >
           <h4 className="text-2xl font-bold mb-6 flex items-center">
-            <i className="fas fa-magic text-[hsl(var(--vibrant-orange))] mr-3"></i>
+            <Brain className="text-[hsl(var(--vibrant-orange))] mr-3 h-5 w-5" />
             AI Project Generator
           </h4>
           
@@ -411,19 +393,19 @@ export default function AiDashboard() {
               >
                 {generateProjectMutation.isPending ? (
                   <>
-                    <i className="fas fa-spinner fa-spin mr-2"></i>
+                    <Loader2 className="animate-spin mr-2 h-4 w-4" />
                     Generating...
                   </>
                 ) : (
                   <>
-                    <i className="fas fa-robot mr-2"></i>
+                    <Bot className="mr-2 h-4 w-4" />
                     Generate with Jarvis
                   </>
                 )}
               </Button>
               
               <div className="text-center text-sm text-gray-400">
-                <i className="fas fa-clock mr-1"></i>
+                <Clock3 className="mr-1 h-3 w-3" />
                 Avg. generation time: 2.3 seconds
               </div>
               
