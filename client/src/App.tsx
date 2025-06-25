@@ -20,6 +20,7 @@ import GamificationDashboard from "@/pages/gamification-dashboard";
 import VoiceAssistantPage from "@/pages/voice-assistant";
 import CulturalPulsePage from "@/pages/cultural-pulse";
 import PaymentPage from "@/pages/payment";
+import ApiManagementPage from "@/pages/api-management";
 
 import FloatingNotifications from "@/components/floating-notifications";
 
@@ -37,6 +38,7 @@ function Router() {
       <ProtectedRoute path="/voice-assistant" component={VoiceAssistantPage} />
       <ProtectedRoute path="/cultural-pulse" component={CulturalPulsePage} />
       <ProtectedRoute path="/payment" component={PaymentPage} />
+      <ProtectedRoute path="/api-management" component={ApiManagementPage} />
       <ProtectedRoute path="/community" component={CommunityPage} />
 
       {/* Fallback to 404 */}

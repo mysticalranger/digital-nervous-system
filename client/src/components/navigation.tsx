@@ -75,6 +75,7 @@ export default function Navigation() {
           {isAuthenticated && <NavLink href="/voice-assistant">Voice AI</NavLink>}
           {isAuthenticated && <NavLink href="/cultural-pulse">Live Pulse</NavLink>}
           {isAuthenticated && <NavLink href="/payment">Credits</NavLink>}
+          {isAuthenticated && <NavLink href="/api-management">API Keys</NavLink>}
           {isAuthenticated && <NavLink href="/community">Community</NavLink>}
           <NavLink href="/contact">Contact</NavLink>
         </div>
