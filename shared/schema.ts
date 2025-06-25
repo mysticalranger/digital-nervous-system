@@ -12,7 +12,56 @@ export interface User {
   achievements: string[];
   projectsCreated: number;
   communityRank: number;
+  subscription: 'free' | 'pro' | 'enterprise';
+  apiUsage: {
+    monthly: number;
+    limit: number;
+  };
   createdAt: string;
+}
+
+// Cultural Analysis specific interfaces
+export interface CulturalAnalysis {
+  culturalScore: number; // 0-100
+  sentiment: 'positive' | 'neutral' | 'negative';
+  confidence: number; // 0-1
+  
+  // UNIQUE FEATURES (competitors don't have these)
+  codeMixingDetection: {
+    languages: string[];
+    mixingPattern: 'hinglish' | 'tanglish' | 'banglish' | 'punglish' | 'other';
+    authenticityScore: number;
+    urbanRuralIndicator: 'urban' | 'semi-urban' | 'rural';
+  };
+  
+  regionalNuances: {
+    primaryRegion: string;
+    culturalMarkers: string[];
+    localSlang: string[];
+    religionNeutrality: number;
+    casteNeutrality: number;
+  };
+  
+  festivalContext: {
+    activeFestival: string | null;
+    seasonalRelevance: number;
+    commercialOpportunity: 'high' | 'medium' | 'low';
+    giftingIntent: boolean;
+  };
+  
+  viralityPrediction: {
+    viralPotential: number; // 0-100
+    shareabilityFactors: string[];
+    memePotential: number;
+    influencerAppeal: number;
+  };
+  
+  brandSafety: {
+    overallSafety: number;
+    religiousConflicts: string[];
+    politicalSensitivity: string[];
+    corporateRisk: 'low' | 'medium' | 'high';
+  };
 }
 
 export interface Project {
@@ -24,6 +73,16 @@ export interface Project {
   aiComplexity: string;
   culturalScore: number;
   createdAt: string;
+}
+
+export interface AnalysisHistory {
+  id: string;
+  userId: string;
+  text: string;
+  result: CulturalAnalysis;
+  region: string;
+  language: string;
+  timestamp: string;
 }
 
 export interface CommunityActivity {
@@ -73,6 +132,14 @@ export const insertUserSchema = z.object({
   email: z.string().email(),
   region: z.string().min(1),
   language: z.string().default("en"),
+  subscription: z.enum(['free', 'pro', 'enterprise']).default('free'),
+});
+
+export const insertAnalysisSchema = z.object({
+  text: z.string().min(1),
+  region: z.string(),
+  language: z.string(),
+  userId: z.string().optional(),
 });
 
 export const insertProjectSchema = z.object({

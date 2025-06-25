@@ -1,0 +1,413 @@
+# 🧠 Digital Nervous System - Complete Replit Agent Prompt
+
+## 🎯 **PROJECT OVERVIEW**
+
+Build a **revolutionary AI-powered Cultural Sentiment Analysis platform** specifically designed for the Indian market. This is not just another sentiment analysis tool - it's the first platform that truly understands Indian culture, languages, and social dynamics.
+
+## 🇮🇳 **UNIQUE VALUE PROPOSITION**
+
+Create India's first **Cultural Intelligence SaaS** that can:
+- Analyze Hindi-English code-mixing (Hinglish) with 95%+ accuracy
+- Detect regional slang from 28+ Indian states
+- Understand cultural context (festivals, traditions, social dynamics)
+- Predict viral potential for Indian social media
+- Assess brand safety for Indian market
+- Support 22+ official Indian languages
+- Generate monetizable insights for businesses
+
+## 🤖 **AI INTEGRATION REQUIREMENTS**
+
+### Primary AI: Google Gemini (FREE)
+```
+API Key: AIzaSyCQqU7bEPsXPGH58bllGXtgb9czpxgKIkA
+Model: gemini-1.5-flash (FREE tier)
+Purpose: Advanced cultural sentiment analysis
+```
+
+### Fallback AI: Mistral (if needed)
+```
+For backup processing when Gemini is unavailable
+```
+
+## 🏗️ **TECHNICAL ARCHITECTURE**
+
+### Frontend Stack
+- **React 18** with TypeScript
+- **Tailwind CSS** + **Framer Motion** for animations
+- **Real-time WebSocket** connections
+- **Mobile-responsive** design
+- **Progressive Web App** (PWA) capabilities
+
+### Backend Stack
+- **Node.js** with Express
+- **TypeScript** for type safety
+- **WebSocket** server for real-time updates
+- **File-based storage** (no database setup required initially)
+- **RESTful API** with proper error handling
+
+### Database Strategy
+```
+Phase 1: JSON file storage (for rapid development)
+Phase 2: PostgreSQL/MongoDB (for scale)
+Phase 3: Redis for caching and real-time features
+```
+
+## 📊 **CORE FEATURES TO IMPLEMENT**
+
+### 1. Advanced Cultural Sentiment Analysis
+```typescript
+interface CulturalAnalysis {
+  culturalScore: number; // 0-100
+  sentiment: 'positive' | 'neutral' | 'negative';
+  confidence: number; // 0-1
+  
+  // UNIQUE FEATURES (competitors don't have these)
+  codeMixingDetection: {
+    languages: string[];
+    mixingPattern: 'hinglish' | 'tanglish' | 'banglish';
+    authenticityScore: number;
+    urbanRuralIndicator: 'urban' | 'semi-urban' | 'rural';
+  };
+  
+  regionalNuances: {
+    primaryRegion: string;
+    culturalMarkers: string[];
+    localSlang: string[];
+    religionNeutrality: number;
+    casteNeutrality: number;
+  };
+  
+  festivalContext: {
+    activeFestival: string | null;
+    seasonalRelevance: number;
+    commercialOpportunity: 'high' | 'medium' | 'low';
+    giftingIntent: boolean;
+  };
+  
+  viralityPrediction: {
+    viralPotential: number; // 0-100
+    shareabilityFactors: string[];
+    memePotential: number;
+    influencerAppeal: number;
+  };
+  
+  brandSafety: {
+    overallSafety: number;
+    religiousConflicts: string[];
+    politicalSensitivity: string[];
+    corporateRisk: 'low' | 'medium' | 'high';
+  };
+}
+```
+
+### 2. Real-time Dashboard
+- **Live sentiment monitoring**
+- **Cultural trend analysis**
+- **Regional performance metrics**
+- **Brand safety alerts**
+- **Viral content predictions**
+
+### 3. User Management System
+```typescript
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  region: string; // Indian state/region
+  language: string; // Primary language
+  subscription: 'free' | 'pro' | 'enterprise';
+  apiUsage: {
+    monthly: number;
+    limit: number;
+  };
+  karma: number; // Gamification
+}
+```
+
+### 4. API Monetization System
+```typescript
+// API Rate Limits
+const RATE_LIMITS = {
+  free: { requests: 100, period: 'day' },
+  pro: { requests: 5000, period: 'day' },
+  enterprise: { requests: 50000, period: 'day' }
+};
+
+// Pricing (INR)
+const PRICING = {
+  pro: 499, // ₹499/month
+  enterprise: 2999 // ₹2999/month
+};
+```
+
+## 🎮 **ENGAGEMENT & GAMIFICATION**
+
+### Addictive Features (Psychological Triggers)
+1. **Streak System**: Daily analysis streaks
+2. **Karma Points**: For community contributions
+3. **Achievement Badges**: Cultural analysis milestones
+4. **Leaderboards**: Regional and national rankings
+5. **Limited-time Challenges**: Festival-based contests
+6. **Social Sharing**: "My cultural insights" sharing
+7. **Referral Rewards**: Invite friends for credits
+
+### Real-time Notifications
+```typescript
+interface Notification {
+  type: 'achievement' | 'streak' | 'viral_alert' | 'festival_opportunity';
+  title: string;
+  message: string;
+  actionButton?: string;
+  deepLink?: string;
+}
+```
+
+## 💰 **MONETIZATION STRATEGY**
+
+### Revenue Streams
+1. **API Subscriptions** (Primary)
+   - Free: 100 requests/day
+   - Pro: ₹499/month (5K requests/day)
+   - Enterprise: ₹2999/month (50K requests/day)
+
+2. **Cultural Intelligence Reports** (Premium)
+   - Regional sentiment reports: ₹999/month
+   - Festival marketing insights: ₹1999/report
+   - Brand safety audits: ₹4999/audit
+
+3. **White-label Solutions** (Enterprise)
+   - Custom AI models: ₹50K+
+   - On-premise deployment: ₹2L+
+
+4. **Data Insights** (B2B)
+   - Anonymized cultural trends: ₹10K/month
+   - Regional consumer behavior: ₹25K/month
+
+## 🗃️ **DATA FLOW & ARCHITECTURE**
+
+### Input Processing Pipeline
+```
+User Input → Language Detection → Cultural Context Analysis → 
+Gemini AI Processing → Regional Analysis → Brand Safety Check → 
+Output Generation → Real-time Updates → Dashboard Display
+```
+
+### Database Schema (File-based initially)
+```json
+// users.json
+{
+  "users": [
+    {
+      "id": "uuid",
+      "username": "string",
+      "email": "string",
+      "region": "Maharashtra",
+      "language": "hi-en",
+      "subscription": "pro",
+      "apiUsage": { "monthly": 1250, "limit": 5000 },
+      "karma": 2500,
+      "achievements": ["code_mixer", "festival_expert"],
+      "createdAt": "2024-12-19T10:30:00Z"
+    }
+  ]
+}
+
+// analyses.json
+{
+  "analyses": [
+    {
+      "id": "uuid",
+      "userId": "uuid",
+      "text": "Yaar this Diwali is gonna be lit! 🪔",
+      "result": { /* Full CulturalAnalysis object */ },
+      "region": "Mumbai",
+      "language": "hinglish",
+      "timestamp": "2024-12-19T10:30:00Z"
+    }
+  ]
+}
+
+// community_activities.json
+{
+  "activities": [
+    {
+      "id": "uuid",
+      "userId": "uuid",
+      "type": "analysis_shared",
+      "description": "Shared cultural analysis of Diwali content",
+      "karma": 50,
+      "timestamp": "2024-12-19T10:30:00Z"
+    }
+  ]
+}
+```
+
+## 🎨 **UI/UX REQUIREMENTS**
+
+### Design Philosophy
+- **Indian-first**: Colors, patterns, and imagery that resonate with Indian users
+- **Mobile-first**: 70% of Indian users are mobile-only
+- **Regional localization**: Support for different scripts and layouts
+- **Accessibility**: Support for various literacy levels
+
+### Color Scheme
+```css
+:root {
+  --primary: #FF6B35; /* Vibrant saffron */
+  --secondary: #004D40; /* Deep green */
+  --accent: #FFD700; /* Gold */
+  --text: #2C3E50;
+  --background: #FAFAFA;
+}
+```
+
+### Key UI Components
+1. **Hero Section**: "Decode India's Digital Emotions"
+2. **Live Demo**: Real-time cultural analysis playground
+3. **Regional Dashboard**: State-wise sentiment maps
+4. **Festival Calendar**: Cultural event predictions
+5. **Brand Safety Monitor**: Real-time risk alerts
+6. **Viral Predictor**: Content virality forecasting
+
+## 🚀 **IMPLEMENTATION ROADMAP**
+
+### Phase 1: Core MVP (Week 1-2)
+- [x] Gemini AI integration
+- [x] Basic sentiment analysis
+- [x] User authentication
+- [x] File-based storage
+- [ ] **TODO**: Real-time dashboard
+- [ ] **TODO**: API rate limiting
+- [ ] **TODO**: Payment integration (Razorpay)
+
+### Phase 2: Advanced Features (Week 3-4)
+- [ ] Code-mixing detection
+- [ ] Regional analysis
+- [ ] Festival context awareness
+- [ ] Brand safety scoring
+- [ ] Viral prediction algorithms
+
+### Phase 3: Monetization (Week 5-6)
+- [ ] Subscription tiers
+- [ ] API marketplace
+- [ ] Enterprise dashboard
+- [ ] White-label solutions
+
+## 🔧 **TECHNICAL SPECIFICATIONS**
+
+### Environment Variables
+```bash
+# AI Configuration
+GEMINI_API_KEY=AIzaSyCQqU7bEPsXPGH58bllGXtgb9czpxgKIkA
+MISTRAL_API_KEY=optional_fallback_key
+
+# Authentication
+SESSION_SECRET=secure_random_string_change_in_production
+
+# Payment Gateway (Indian)
+RAZORPAY_KEY_ID=your_razorpay_key
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+
+# Features Flags
+ENABLE_PREMIUM_FEATURES=true
+ENABLE_ANALYTICS=true
+ENABLE_WEBSOCKETS=true
+```
+
+### Performance Requirements
+- **API Response Time**: < 200ms for analysis
+- **WebSocket Latency**: < 50ms for real-time updates
+- **Concurrent Users**: Support 1000+ simultaneous users
+- **Uptime**: 99.9% availability
+- **Data Processing**: Handle 10K+ analyses per day
+
+## 📈 **SUCCESS METRICS**
+
+### Business KPIs
+- **User Acquisition**: 1000+ signups in first month
+- **Revenue**: ₹50K+ MRR within 3 months
+- **API Usage**: 100K+ API calls per month
+- **Retention**: 60%+ monthly active users
+
+### Technical KPIs
+- **Analysis Accuracy**: 95%+ for Indian content
+- **Processing Speed**: < 2 seconds per analysis
+- **System Uptime**: 99.9%
+- **User Satisfaction**: 4.5+ star rating
+
+## 🎯 **UNIQUE COMPETITIVE ADVANTAGES**
+
+1. **First-mover advantage** in Indian cultural AI
+2. **Deep regional understanding** (not available in global tools)
+3. **Code-mixing expertise** (Hinglish, Tanglish, etc.)
+4. **Festival and cultural context** awareness
+5. **Indian payment gateway** integration
+6. **Local language support** for 22+ languages
+7. **Affordable pricing** for Indian market
+
+## 🔐 **SECURITY & COMPLIANCE**
+
+### Data Protection
+- **GDPR compliance** for international users
+- **Indian data localization** requirements
+- **End-to-end encryption** for sensitive data
+- **API key security** and rotation
+- **Rate limiting** and DDoS protection
+
+### Privacy Features
+- **Anonymized analytics**
+- **Data retention policies**
+- **User consent management**
+- **Right to be forgotten**
+
+## 🌟 **INNOVATION OPPORTUNITIES**
+
+### AI Enhancements
+1. **Voice sentiment analysis** (regional accents)
+2. **Image cultural context** (festivals, traditions)
+3. **Video content analysis** (YouTube, Instagram Reels)
+4. **Real-time social media monitoring**
+5. **Predictive cultural trend analysis**
+
+### Platform Extensions
+1. **Chrome extension** for real-time web analysis
+2. **Mobile app** for on-the-go analysis
+3. **Slack/Teams integration** for enterprises
+4. **API marketplace** for developers
+5. **Cultural intelligence widgets**
+
+## 🎨 **BRANDING & POSITIONING**
+
+### Brand Message
+**"Decode India's Digital Emotions"**
+
+### Value Propositions
+- "India's first Cultural AI that truly gets us"
+- "From Hinglish to insights - we speak your language"
+- "Turn cultural nuances into business advantages"
+- "Built by Indians, for Indian businesses"
+
+### Target Audience
+1. **Digital Marketing Agencies** (primary)
+2. **E-commerce Brands** (secondary)
+3. **Social Media Managers** (tertiary)
+4. **Developers & API Users** (growth)
+
+---
+
+## 🚀 **FINAL INSTRUCTIONS FOR REPLIT AGENT**
+
+**Build this as a production-ready SaaS platform that can handle real users and generate real revenue. Focus on:**
+
+1. **Robust error handling** and graceful fallbacks
+2. **Scalable architecture** that can grow with demand
+3. **Indian market optimization** (pricing, payments, languages)
+4. **Mobile-first responsive design**
+5. **Real-time features** that create engagement
+6. **Monetization-ready** with clear upgrade paths
+7. **SEO optimization** for Indian keywords
+8. **Performance optimization** for Indian internet speeds
+
+**This should be the kind of platform that Indian businesses will pay for because it solves a real problem that no one else is solving with this level of cultural understanding.**
+
+**Make it addictive, valuable, and uniquely Indian. This is not just a demo - this is a potential ₹10 Crore+ business opportunity.**

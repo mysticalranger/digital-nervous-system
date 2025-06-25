@@ -94,22 +94,137 @@ interface PoliticalAnalysis {
   activismLevel: number;
 }
 
+// Rate limits for API monetization
+export const RATE_LIMITS = {
+  free: { requests: 100, period: 'day' },
+  pro: { requests: 5000, period: 'day' },
+  enterprise: { requests: 50000, period: 'day' }
+};
+
+// Pricing (INR)
+export const PRICING = {
+  pro: 499, // ₹499/month
+  enterprise: 2999 // ₹2999/month
+};
+
+class CulturalKnowledgeBase {
+  private indianFestivals = [
+    'Diwali', 'Holi', 'Dussehra', 'Ganesh Chaturthi', 'Navratri', 'Karva Chauth', 
+    'Eid', 'Christmas', 'Onam', 'Pongal', 'Baisakhi', 'Durga Puja'
+  ];
+  
+  private regionalSlang = {
+    'North India': ['yaar', 'bhai', 'dude', 'boss', 'paaji'],
+    'South India': ['da', 'ra', 'machaa', 'anna', 'akka'],
+    'West India': ['bc', 'boss', 'dada', 'tai'],
+    'East India': ['dada', 'didi', 'bhai']
+  };
+  
+  private hinglishPatterns = [
+    /\b(yaar|bhai|dude|boss)\b/gi,
+    /\b(accha|theek|kya|hai|nahi)\b/gi,
+    /\b(paisa|rupee|lakh|crore)\b/gi
+  ];
+
+  detectFestivalContext(text: string): { festival: string | null; relevance: number } {
+    const normalizedText = text.toLowerCase();
+    for (const festival of this.indianFestivals) {
+      if (normalizedText.includes(festival.toLowerCase())) {
+        return { festival, relevance: 0.9 };
+      }
+    }
+    return { festival: null, relevance: 0 };
+  }
+  
+  detectCodeMixing(text: string): { isHinglish: boolean; score: number; patterns: string[] } {
+    let score = 0;
+    const detectedPatterns: string[] = [];
+    
+    for (const pattern of this.hinglishPatterns) {
+      const matches = text.match(pattern);
+      if (matches) {
+        score += matches.length * 0.2;
+        detectedPatterns.push(...matches);
+      }
+    }
+    
+    return {
+      isHinglish: score > 0.3,
+      score: Math.min(score, 1),
+      patterns: detectedPatterns
+    };
+  }
+  
+  getCulturalKeywords(region: string) {
+    return {
+      positive: ['amazing', 'fantastic', 'excellent', 'beautiful', 'wonderful', 'perfect', 'best', 'love', 'great', 'awesome', 'fabulous', 'outstanding', 'superb', 'brilliant', 'magnificent'],
+      negative: ['terrible', 'awful', 'horrible', 'bad', 'worst', 'hate', 'disgusting', 'pathetic', 'disappointing', 'useless', 'annoying', 'frustrating', 'boring', 'stupid', 'ridiculous']
+    };
+  }
+  
+  getSentimentWords() {
+    return {
+      positive: ['good', 'nice', 'happy', 'joy', 'excited', 'pleased', 'satisfied', 'delighted', 'thrilled', 'grateful', 'blessed', 'lucky', 'proud', 'confident', 'optimistic'],
+      negative: ['sad', 'angry', 'upset', 'disappointed', 'frustrated', 'worried', 'stressed', 'anxious', 'depressed', 'scared', 'confused', 'tired', 'sick', 'hurt', 'lonely']
+    };
+  }
+  
+  getRegionalMarkers(region: string) {
+    const markers = {
+      'North India': [
+        { term: 'bhai', type: 'slang' },
+        { term: 'yaar', type: 'slang' },
+        { term: 'paaji', type: 'cultural' },
+        { term: 'sardar', type: 'cultural' }
+      ],
+      'South India': [
+        { term: 'anna', type: 'slang' },
+        { term: 'machaa', type: 'slang' },
+        { term: 'da', type: 'slang' },
+        { term: 'ra', type: 'slang' }
+      ],
+      'West India': [
+        { term: 'boss', type: 'slang' },
+        { term: 'dada', type: 'cultural' },
+        { term: 'tai', type: 'cultural' }
+      ],
+      'East India': [
+        { term: 'dada', type: 'cultural' },
+        { term: 'didi', type: 'cultural' },
+        { term: 'bhai', type: 'slang' }
+      ]
+    };
+    return markers[region as keyof typeof markers] || [];
+  }
+  
+  getFestivalCalendar() {
+    return [
+      { name: 'Diwali', months: [10, 11], importance: 0.9, sentimentBoost: 0.8 },
+      { name: 'Holi', months: [3], importance: 0.8, sentimentBoost: 0.7 },
+      { name: 'Dussehra', months: [10], importance: 0.7, sentimentBoost: 0.6 },
+      { name: 'Eid', months: [4, 5, 7, 8], importance: 0.8, sentimentBoost: 0.7 },
+      { name: 'Christmas', months: [12], importance: 0.7, sentimentBoost: 0.6 },
+      { name: 'Navratri', months: [10], importance: 0.7, sentimentBoost: 0.6 }
+    ];
+  }
+}
+
 export class AdvancedCulturalAnalyzer {
   private mistral: Mistral | null = null;
   private gemini: GoogleGenerativeAI | null = null;
   private culturalDatabase: CulturalKnowledgeBase;
-    constructor(mistralApiKey?: string, geminiApiKey?: string) {
+  constructor(mistralApiKey?: string, geminiApiKey?: string) {
     // Prioritize Gemini over Mistral for better Indian language understanding
     if (geminiApiKey && geminiApiKey !== "your_gemini_key_here") {
       this.gemini = new GoogleGenerativeAI(geminiApiKey);
-      console.log('🤖 Gemini AI initialized for cultural analysis (FREE TIER)');
+      console.log('Gemini AI initialized for cultural analysis (FREE TIER)');
     } else if (mistralApiKey && mistralApiKey !== "default_key" && mistralApiKey !== "your_mistral_ai_key_here") {
       this.mistral = new Mistral({ apiKey: mistralApiKey });
-      console.log('🤖 Mistral AI initialized for cultural analysis');
+      console.log('Mistral AI initialized for cultural analysis');
     } else {
-      console.log('⚠️ No AI API keys provided, using enhanced local analysis');
+      console.log('No AI API keys provided, using enhanced local analysis');
     }
-    this.culturalDatabase = new CulturalKnowledgeBase();
+    this.culturalDatabase = new CulturalKnowledgeBase();ase();
   }
 
   async analyzeCulturalContext(text: string, region: string, language: string): Promise<EnhancedCulturalAnalysis> {
@@ -476,6 +591,49 @@ CONTEXT TO CONSIDER:
 
 Respond ONLY with the JSON object, no additional text.`;
 
+        const prompt = `
+You are an advanced Cultural Sentiment Analysis AI specifically designed for the Indian market. Analyze the following text for cultural sentiment, code-mixing patterns, and regional nuances.
+
+Text: "${text}"
+Region: ${region}
+
+Please provide a detailed analysis in JSON format with the following structure:
+{
+  "culturalScore": (0-100),
+  "sentiment": "positive|neutral|negative",
+  "confidence": (0-1),
+  "culturalInsights": ["insight1", "insight2"],
+  "codeMixing": {
+    "detected": true/false,
+    "languages": ["Hindi", "English"],
+    "pattern": "hinglish|tanglish|banglish|other",
+    "authenticityScore": (0-1)
+  },
+  "regionalContext": {
+    "primaryRegion": "${region}",
+    "culturalMarkers": ["marker1", "marker2"],
+    "localSlang": ["slang1", "slang2"]
+  },
+  "festivalContext": {
+    "activeFestival": "festival_name_or_null",
+    "seasonalRelevance": (0-1),
+    "commercialOpportunity": "high|medium|low"
+  },
+  "viralPotential": {
+    "score": (0-100),
+    "factors": ["factor1", "factor2"],
+    "memePotential": (0-100)
+  },
+  "brandSafety": {
+    "overallSafety": (0-100),
+    "risks": ["risk1", "risk2"],
+    "corporateRisk": "low|medium|high"
+  }
+}
+
+Focus on Indian cultural nuances, Hindi-English code-mixing, regional variations, and festival/seasonal context.
+`;
+        
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const analysisText = response.text();
@@ -484,7 +642,7 @@ Respond ONLY with the JSON object, no additional text.`;
         const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const analysis = JSON.parse(jsonMatch[0]);
-          console.log('✅ Gemini AI analysis completed (FREE TIER)');
+          console.log('Gemini AI analysis completed (FREE TIER)');
           return {
             culturalScore: analysis.culturalScore || 50,
             sentiment: analysis.sentiment || 'neutral',

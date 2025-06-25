@@ -15,6 +15,7 @@ import FeaturesPage from "@/pages/features-page";
 import UserDashboardPage from "@/pages/user-dashboard-page";
 import CommunityPage from "@/pages/community-page";
 import ContactPage from "@/pages/contact-page";
+import AnalyticsDashboard from "@/pages/dashboard";
 
 import FloatingNotifications from "@/components/floating-notifications";
 
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/contact" component={ContactPage} />
 
       <ProtectedRoute path="/dashboard" component={UserDashboardPage} />
+      <ProtectedRoute path="/analytics" component={AnalyticsDashboard} />
       <ProtectedRoute path="/community" component={CommunityPage} />
 
       {/* Fallback to 404 */}
