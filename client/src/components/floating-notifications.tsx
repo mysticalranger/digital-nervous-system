@@ -22,96 +22,37 @@ export default function FloatingNotifications() {
   const [showNotificationCenter, setShowNotificationCenter] = useState(false);
   const queryClient = useQueryClient();
 
-  // Fetch notifications with high frequency to trigger checking behavior
+  // Reduced frequency to avoid user frustration
   const { data: notifications = [] } = useQuery({
-    queryKey: ['/api/engagement/notifications', 1],
-    refetchInterval: 10000, // Check every 10 seconds for new notifications
+    queryKey: ['/api/engagement/notifications'],
+    refetchInterval: 60000 // Check every 60 seconds instead of 10
   });
 
-  // Generate random engagement notifications to maintain user attention
+  // Process server notifications with limits to prevent spam
   useEffect(() => {
-    const generateRandomNotification = () => {
-      const notificationTypes = [
-        {
-          type: 'limited_offer',
-          title: 'Limited Time Offer!',
-          message: 'Free premium AI features for the next 30 minutes',
-          priority: 'high',
-          duration: 8000,
-          actionText: 'Claim Now',
-          emoji: '⚡'
-        },
-        {
-          type: 'social',
-          title: 'Community Activity',
-          message: '12 developers are currently working on cultural AI projects',
-          priority: 'medium',
-          duration: 6000,
-          actionText: 'Join Them',
-          emoji: '👥'
-        },
-        {
-          type: 'streak',
-          title: 'Streak Alert!',
-          message: 'Complete today\'s challenge to maintain your streak',
-          priority: 'high',
-          duration: 7000,
-          actionText: 'Continue',
-          emoji: '🔥'
-        },
-        {
-          type: 'achievement',
-          title: 'New Badge Available!',
-          message: 'You\'re 2 challenges away from "Cultural Expert"',
-          priority: 'medium',
-          duration: 5000,
-          actionText: 'View Progress',
-          emoji: '🏆'
-        },
-        {
-          type: 'bonus',
-          title: 'Surprise Bonus!',
-          message: 'Complete any challenge now for 2x points',
-          priority: 'high',
-          duration: 10000,
-          actionText: 'Start Challenge',
-          emoji: '💎'
-        }
-      ];
-
-      const randomNotification = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
-      const notification: FloatingNotification = {
-        ...randomNotification,
-        id: `floating-${Date.now()}-${Math.random()}`,
-        priority: randomNotification.priority as 'low' | 'medium' | 'high'
-      };
-
-      setActiveNotifications(prev => [...prev, notification]);
-
-      // Auto-remove notification after duration
-      setTimeout(() => {
-        setActiveNotifications(prev => prev.filter(n => n.id !== notification.id));
-      }, notification.duration || 5000);
-    };
-
-    // Show first notification after 10 seconds
-    const initialTimer = setTimeout(generateRandomNotification, 10000);
-
-    // Then show notifications at random intervals to create variable reward schedule
-    const scheduleNextNotification = () => {
-      const randomInterval = Math.random() * 60000 + 30000; // 30s to 1.5min
-      setTimeout(() => {
-        generateRandomNotification();
-        scheduleNextNotification();
-      }, randomInterval);
-    };
-
-    scheduleNextNotification();
-
-    return () => {
-      clearTimeout(initialTimer);
-    };
-  }, []);
+    if (notifications && notifications.length > 0) {
+      // Only show maximum 1 notification per session and space them out
+      const limitedNotifications = notifications.slice(0, 1);
+      
+      limitedNotifications.forEach((notification: any, index: number) => {
+        // Don't show if already showing notifications
+        if (activeNotifications.length >= 1) return;
+        
+        setTimeout(() => {
+          setActiveNotifications(prev => {
+            // Double check limit
+            if (prev.length >= 1) return prev;
+            return [...prev, {
+              ...notification,
+              id: notification.id || `notif_${Date.now()}`,
+              priority: 'medium' as const,
+              duration: 12000 // Longer duration for better readability
+            }];
+          });
+        }, index * 8000); // More spacing between notifications
+      });
+    }
+  }, [notifications]);
 
   const dismissNotification = (id: string) => {
     setActiveNotifications(prev => prev.filter(n => n.id !== id));

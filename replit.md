@@ -152,3 +152,11 @@ User Actions → Karma Calculation → Achievement Check → Real-time Broadcast
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+### UI Design Preferences
+- Futuristic dark theme with gradient backgrounds (slate-900, purple-900)
+- Reduced notification frequency to avoid user frustration (60-second intervals, max 2 per session)
+- Glass-morphism design with backdrop blur effects
+- Animated elements and smooth transitions
+- Better spacing and layout to prevent content cutoff issues
+- Professional color scheme: purple, cyan, and white gradients
