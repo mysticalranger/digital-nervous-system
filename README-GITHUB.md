@@ -1,224 +1,260 @@
-# 🚀 Digital Nervous System - Cultural Sentiment AI
+# Digital Nervous System - Cultural Intelligence Platform
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org)
-[![React](https://img.shields.io/badge/React-18+-blue.svg)](https://reactjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue.svg)](https://www.typescriptlang.org)
-[![Google Gemini](https://img.shields.io/badge/Powered%20by-Google%20Gemini-4285F4.svg)](https://ai.google.dev)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-## 🎯 Revolutionary AI-Powered Cultural Sentiment Analysis for Indian Market
+## Overview
 
-This is the **world's first AI-powered Cultural Sentiment Analysis system** specifically designed for the Indian market, using Google's **completely FREE** Gemini 1.5 Flash model.
+Digital Nervous System is a revolutionary AI-powered Cultural Sentiment Analysis platform specifically designed for the Indian market. Built as a full-stack web application, it leverages Google's free Gemini 1.5 Flash model to provide sophisticated cultural intelligence, sentiment analysis, and regional insights for Indian businesses, developers, and content creators.
 
-### 🌟 What Makes This Project Revolutionary?
+## Key Features
 
-- **🆓 FREE AI POWER**: Uses Google Gemini 1.5 Flash (FREE tier) - Zero API costs
-- **🇮🇳 HINDI-ENGLISH CODE-MIXING**: Understands "Hinglish" perfectly 
-- **🏛️ REGIONAL INTELLIGENCE**: Detects cultural nuances across 28+ Indian states
-- **🎉 FESTIVAL-AWARE**: Contextualizes content based on Indian festivals and seasons
-- **🛡️ BRAND SAFETY**: Advanced brand safety analysis for Indian corporate environment
-- **🚀 VIRAL PREDICTION**: Predicts social media virality for Indian audience
+### 🧠 AI Cultural Intelligence
+- Advanced sentiment analysis tailored for Indian cultural context
+- Code-mixing detection (Hinglish, Tanglish, etc.)
+- Regional cultural nuance analysis across 28+ Indian states
+- Festival and seasonal context integration
+- Brand safety scoring for Indian market
 
-## 🚀 Quick Start
+### 🚀 Real-time Analytics
+- Live cultural pulse monitoring
+- Trending topics and viral predictions
+- Regional sentiment tracking
+- Festival context awareness
+- Multi-language support
+
+### 💼 Business API Integration
+- Enterprise-grade authentication with API keys
+- Rate limiting and usage tracking
+- Credit-based billing system
+- Comprehensive business endpoints
+- SDKs and integration guides
+
+### 🎮 Gamification System
+- Cultural mastery levels and achievements
+- Daily challenges and streaks
+- Community leaderboards
+- Cultural coins reward system
+- Social engagement features
+
+## Technology Stack
+
+### Frontend
+- **React 18+** with TypeScript
+- **Vite** for fast development and optimized builds
+- **Tailwind CSS** with custom design system
+- **Framer Motion** for smooth animations
+- **TanStack Query** for efficient data fetching
+- **Wouter** for lightweight routing
+- **Radix UI** + **shadcn/ui** component library
+
+### Backend
+- **Node.js** with Express.js
+- **TypeScript** with ES modules
+- **PostgreSQL** with Drizzle ORM
+- **JWT** authentication with bcrypt
+- **WebSocket** for real-time features
+- **Razorpay** integration for payments
+
+### AI Integration
+- **Google Gemini 1.5 Flash** (Primary - FREE tier)
+- **Mistral AI** (Secondary integration)
+- Custom cultural analysis engine
+- Multi-language processing pipeline
+
+## Quick Start
 
 ### Prerequisites
-- Node.js 18+ installed
-- A free Google API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+- Node.js 18+ 
+- PostgreSQL database (optional for development)
+- API keys for AI services (optional)
 
 ### Installation
 
+1. **Clone the repository**
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/digital-nervous-system.git
 cd digital-nervous-system
+```
 
-# Install dependencies
+2. **Install dependencies**
+```bash
 npm install
+```
 
-# Set up environment variables
+3. **Environment setup**
+```bash
 cp .env.example .env
-# Add your Gemini API key to .env file
-
-# Start the development server
-npm run dev
-
-# Open your browser to http://localhost:5000
+# Edit .env with your configuration
 ```
 
-## 📖 API Usage
+4. **Database setup (optional)**
+```bash
+# For PostgreSQL (production)
+npm run db:push
 
-### Cultural Sentiment Analysis
-
-```javascript
-// POST /api/ai/analyze-cultural-context
-{
-  "text": "Yaar this Diwali is going to be lit! 🪔✨",
-  "region": "Maharashtra",
-  "language": "en"
-}
-
-// Response
-{
-  "culturalScore": 89,
-  "sentimentAnalysis": "positive",
-  "confidence": 0.94,
-  "culturalInsights": [
-    "High cultural alignment with festival context",
-    "Code-mixing indicates urban millennial audience",
-    "Strong viral potential detected"
-  ],
-  "codeMixingDetection": {
-    "languages": [
-      {"language": "English", "percentage": 70},
-      {"language": "Hindi", "percentage": 30}
-    ],
-    "mixingPattern": "hinglish",
-    "authenticityScore": 92
-  },
-  "viralPotential": 78,
-  "brandSafety": 95
-}
+# For development, the app uses file-based storage
 ```
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Framer Motion
-- **Backend**: Node.js, Express, TypeScript
-- **AI**: Google Gemini 1.5 Flash (FREE), Fallback to Mistral AI
-- **Storage**: File-based JSON storage (no database required)
-- **Real-time**: WebSocket connections
-- **UI**: Shadcn/ui components
-
-## 🌐 Features
-
-### ✅ Completed Features
-
-- **Advanced Cultural Analysis**: Multi-dimensional cultural sentiment scoring
-- **Real-time Processing**: WebSocket-based real-time updates
-- **Code-mixing Detection**: Supports 10+ Indian languages
-- **Regional Intelligence**: State-wise cultural markers
-- **Festival Context**: Seasonal and festival-aware analysis
-- **Brand Safety**: Corporate-grade content safety scoring
-- **Viral Prediction**: Social media virality forecasting
-- **User Management**: Registration, authentication, and profiles
-- **Project Management**: Create and manage AI analysis projects
-- **Community Features**: Activity feeds and karma system
-- **Analytics Dashboard**: Real-time metrics and insights
-
-## 🏗️ Project Structure
-
-```
-digital-nervous-system/
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── components/    # UI components
-│   │   ├── pages/         # Route pages
-│   │   ├── hooks/         # React hooks
-│   │   └── lib/           # Utilities
-├── server/                # Express backend
-│   ├── ai-engine/         # AI analysis engine
-│   ├── routes.ts          # API routes
-│   └── index.ts           # Server entry
-├── shared/                # Shared types
-├── data/                  # JSON file storage
-└── README.md
-```
-
-## 💰 Business Model & Monetization
-
-### 🎯 Revenue Streams
-
-1. **API Subscriptions**: ₹99-₹999/month for businesses
-2. **Enterprise Solutions**: ₹10,000-₹50,000/month for large corporations
-3. **White-label Solutions**: ₹1,00,000+ for custom implementations
-4. **Consulting Services**: ₹5,000/hour for AI strategy consulting
-
-### 📊 Market Opportunity
-
-- **Indian Content Marketing**: ₹2,000 crore market
-- **Social Media Analytics**: ₹500 crore market
-- **Brand Safety Tools**: ₹300 crore market
-- **Cultural Intelligence**: Untapped ₹1,000+ crore opportunity
-
-## 🚀 Deployment
-
-### Local Development
+5. **Start development server**
 ```bash
 npm run dev
 ```
 
-### Production Build
-```bash
-npm run build
-npm start
-```
+The application will be available at `http://localhost:5000`
 
 ### Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file with the following variables:
 
 ```env
-# Google Gemini API Key (Get from https://makersuite.google.com/app/apikey)
-GEMINI_API_KEY=your_gemini_api_key_here
+# Database (optional for development)
+DATABASE_URL=postgresql://username:password@localhost:5432/cultural_ai
 
-# Session Secret (Change for production)
-SESSION_SECRET=your_random_secret_string_here
+# AI Services (optional)
+GEMINI_API_KEY=your_gemini_api_key
+MISTRAL_API_KEY=your_mistral_api_key
 
-# Optional - Fallback Mistral API Key
-MISTRAL_API_KEY=your_mistral_key_here
+# Session Security
+SESSION_SECRET=your_secure_session_secret
 
-# Optional - Razorpay for payments
+# Payment Integration (optional)
 RAZORPAY_KEY_ID=your_razorpay_key
-RAZORPAY_KEY_SECRET=your_razorpay_secret
+RAZORPAY_SECRET=your_razorpay_secret
+
+# Replit Integration (for deployment)
+REPL_ID=your_repl_id
+ISSUER_URL=https://replit.com/oidc
+REPLIT_DOMAINS=your-domain.replit.dev
 ```
 
-## 🤝 Contributing
+## API Documentation
 
-We welcome contributions! Please follow these steps:
+### Business API Endpoints
+
+The platform provides enterprise-ready API endpoints:
+
+- `POST /v1/analyze` - Cultural sentiment analysis
+- `POST /v1/batch-analyze` - Batch processing
+- `POST /v1/voice-analyze` - Voice sentiment analysis
+- `GET /v1/cultural-pulse` - Live cultural trends
+- `GET /v1/viral-prediction` - Viral content prediction
+- `GET /v1/usage-stats` - API usage analytics
+- `GET /v1/account` - Account information
+- `GET /health` - Health check
+
+### Authentication
+
+All API endpoints require authentication via API keys:
+
+```bash
+curl -H "Authorization: Bearer YOUR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"text": "Yaar this startup idea is fantastic!", "region": "North India"}' \
+     https://your-domain.com/v1/analyze
+```
+
+## Project Structure
+
+```
+├── client/                 # React frontend
+│   ├── src/
+│   │   ├── components/    # Reusable UI components
+│   │   ├── pages/         # Page components
+│   │   ├── hooks/         # Custom React hooks
+│   │   └── lib/          # Utilities and configurations
+├── server/                # Express backend
+│   ├── ai-engine/        # AI processing modules
+│   ├── db.ts             # Database configuration
+│   ├── storage.ts        # Data storage layer
+│   ├── routes.ts         # API routes
+│   └── index.ts          # Server entry point
+├── shared/               # Shared types and schemas
+│   └── schema.ts         # Database schemas
+└── data/                # Development data storage
+```
+
+## Deployment
+
+### Replit Deployment (Recommended)
+
+1. **Import to Replit**
+   - Go to Replit.com
+   - Click "Import from GitHub"
+   - Enter your repository URL
+
+2. **Configure environment**
+   - Set environment variables in Replit Secrets
+   - The `.replit` file is pre-configured
+
+3. **Deploy**
+   - Click "Deploy" in Replit
+   - Your app will be available at `your-repl.replit.app`
+
+### Manual Deployment
+
+1. **Build the application**
+```bash
+npm run build
+```
+
+2. **Start production server**
+```bash
+npm run start
+```
+
+3. **Database migration**
+```bash
+npm run db:push
+```
+
+## Features in Detail
+
+### Cultural Intelligence Engine
+- **Code-mixing Detection**: Understands Hinglish, Tanglish, and other Indian language combinations
+- **Regional Analysis**: Tailored insights for different Indian states and cultures
+- **Festival Context**: Seasonal and festival-aware sentiment analysis
+- **Brand Safety**: Comprehensive safety scoring for marketing content
+
+### Gamification System
+- **Mastery Levels**: Progress through cultural understanding levels
+- **Daily Challenges**: Engaging daily tasks with variable rewards
+- **Achievement System**: Unlock badges and milestones
+- **Community Features**: Leaderboards and social engagement
+
+### Business Integration
+- **Enterprise API**: Robust authentication and rate limiting
+- **Usage Analytics**: Comprehensive tracking and reporting
+- **Credit System**: Flexible pricing with ₹1 = 10 credits
+- **Documentation**: Complete API documentation and SDKs
+
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📋 Available Scripts
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run check` - Type checking
-
-## 🔒 Security
-
-- Environment variables are properly secured
-- API keys are never committed to the repository
-- Input validation and sanitization implemented
-- Rate limiting and error handling in place
-
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## Support
 
-- **Google Gemini AI** for providing free, powerful AI capabilities
-- **Indian Developer Community** for inspiration and feedback
-- **Shadcn/ui** for beautiful UI components
-- **React** and **Node.js** communities for excellent frameworks
+- **Documentation**: Full API documentation available in `/docs`
+- **Issues**: Report bugs and feature requests on GitHub Issues
+- **Community**: Join our Discord community for support
 
-## 📞 Contact
+## Roadmap
 
-- **Issues**: Please use GitHub Issues for bug reports and feature requests
-- **Discussions**: Use GitHub Discussions for questions and ideas
-- **Email**: [Create an issue](https://github.com/yourusername/digital-nervous-system/issues) for private matters
-
-## 🌟 Show Your Support
-
-If this project helped you, please give it a ⭐️ on GitHub!
+- [ ] Mobile app development
+- [ ] Additional AI model integrations
+- [ ] Advanced analytics dashboard
+- [ ] Multi-tenant business features
+- [ ] Custom model training capabilities
 
 ---
 
-**Made with ❤️ for the Indian tech community**
-
-**#MadeInIndia #AIForIndia #CulturalTech #GeminiAI**
+Built with ❤️ for the Indian digital ecosystem
