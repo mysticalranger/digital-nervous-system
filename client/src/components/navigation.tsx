@@ -70,6 +70,7 @@ export default function Navigation() {
         <div className="hidden md:flex items-center space-x-8">
           <NavLink href="/features">Features</NavLink>
           {isAuthenticated && <NavLink href="/dashboard">Dashboard</NavLink>}
+          {isAuthenticated && <NavLink href="/analytics">Analytics</NavLink>}
           {isAuthenticated && <NavLink href="/community">Community</NavLink>}
           <NavLink href="/contact">Contact</NavLink>
         </div>
