@@ -16,6 +16,10 @@ import UserDashboardPage from "@/pages/user-dashboard-page";
 import CommunityPage from "@/pages/community-page";
 import ContactPage from "@/pages/contact-page";
 import AnalyticsDashboard from "@/pages/dashboard";
+import GamificationDashboard from "@/pages/gamification-dashboard";
+import VoiceAssistantPage from "@/pages/voice-assistant";
+import CulturalPulsePage from "@/pages/cultural-pulse";
+import PaymentPage from "@/pages/payment";
 
 import FloatingNotifications from "@/components/floating-notifications";
 
@@ -29,6 +33,10 @@ function Router() {
 
       <ProtectedRoute path="/dashboard" component={UserDashboardPage} />
       <ProtectedRoute path="/analytics" component={AnalyticsDashboard} />
+      <ProtectedRoute path="/gamification" component={GamificationDashboard} />
+      <ProtectedRoute path="/voice-assistant" component={VoiceAssistantPage} />
+      <ProtectedRoute path="/cultural-pulse" component={CulturalPulsePage} />
+      <ProtectedRoute path="/payment" component={PaymentPage} />
       <ProtectedRoute path="/community" component={CommunityPage} />
 
       {/* Fallback to 404 */}

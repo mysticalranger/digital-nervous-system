@@ -17,7 +17,65 @@ export interface User {
     monthly: number;
     limit: number;
   };
+  
+  // Gamification System
+  culturalCoins: number;
+  masteryLevel: number;
+  currentStreak: number;
+  longestStreak: number;
+  totalAnalyses: number;
+  lastActiveDate: string;
+  
+  // User Preferences
+  preferredVoiceAssistant: 'arjun' | 'priya' | 'raj' | 'devi';
+  notificationSettings: {
+    dailyReminders: boolean;
+    weeklyDigest: boolean;
+    trendingAlerts: boolean;
+    festivalNotifications: boolean;
+  };
+  
   createdAt: string;
+}
+
+// Gamification Interfaces
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'analysis' | 'streak' | 'social' | 'festival' | 'mastery';
+  requirements: {
+    type: string;
+    target: number;
+  };
+  reward: {
+    culturalCoins: number;
+    masteryXP: number;
+  };
+}
+
+export interface UserStreak {
+  userId: string;
+  currentStreak: number;
+  lastActiveDate: string;
+  streakType: 'daily_analysis' | 'festival_participation' | 'community_engagement';
+}
+
+export interface CulturalChallenge {
+  id: string;
+  title: string;
+  description: string;
+  type: 'prediction' | 'analysis' | 'meme' | 'festival';
+  startDate: string;
+  endDate: string;
+  participants: string[];
+  prizes: {
+    first: number;
+    second: number;
+    third: number;
+  };
+  status: 'upcoming' | 'active' | 'completed';
 }
 
 // Cultural Analysis specific interfaces
@@ -54,6 +112,7 @@ export interface CulturalAnalysis {
     shareabilityFactors: string[];
     memePotential: number;
     influencerAppeal: number;
+    optimalShareTime: string;
   };
   
   brandSafety: {
@@ -61,6 +120,90 @@ export interface CulturalAnalysis {
     religiousConflicts: string[];
     politicalSensitivity: string[];
     corporateRisk: 'low' | 'medium' | 'high';
+  };
+  
+  // Meme Intelligence
+  memeDetection: {
+    isMeme: boolean;
+    memeType: string;
+    culturalReferences: string[];
+    generationalAppeal: 'gen-z' | 'millennial' | 'gen-x' | 'boomer';
+    viralTrajectory: 'emerging' | 'trending' | 'peak' | 'declining';
+  };
+  
+  // Social Commerce
+  commerceInsights: {
+    purchaseIntent: number;
+    priceSegment: 'budget' | 'mid-range' | 'premium' | 'luxury';
+    recommendedProducts: string[];
+    seasonalDemand: number;
+  };
+}
+
+// AI Voice Assistant Interfaces
+export interface VoiceAssistant {
+  id: 'arjun' | 'priya' | 'raj' | 'devi';
+  name: string;
+  city: string;
+  personality: string;
+  languageStrengths: string[];
+  culturalExpertise: string[];
+  voiceStyle: 'formal' | 'casual' | 'friendly' | 'professional';
+}
+
+export interface VoiceAnalysis {
+  transcription: string;
+  detectedLanguage: string;
+  culturalContext: CulturalAnalysis;
+  assistantResponse: {
+    text: string;
+    audioUrl?: string;
+    insights: string[];
+    suggestions: string[];
+  };
+}
+
+// Live Cultural Pulse
+export interface CulturalPulse {
+  timestamp: string;
+  trendingTopics: Array<{
+    topic: string;
+    sentiment: number;
+    volume: number;
+    regions: string[];
+  }>;
+  regionalMood: Array<{
+    region: string;
+    overallSentiment: 'positive' | 'neutral' | 'negative';
+    dominantEmotions: string[];
+    confidenceLevel: number;
+  }>;
+  festivalMood: {
+    activeFestivals: string[];
+    anticipationLevel: number;
+    commercialActivity: number;
+    socialEngagement: number;
+  };
+  viralPredictions: Array<{
+    content: string;
+    viralPotential: number;
+    peakTime: string;
+    targetAudience: string[];
+  }>;
+}
+
+// Micro-transactions
+export interface Transaction {
+  id: string;
+  userId: string;
+  type: 'purchase' | 'earn' | 'spend';
+  amount: number; // in cultural coins
+  description: string;
+  timestamp: string;
+  metadata?: {
+    subscriptionType?: string;
+    featureUnlocked?: string;
+    achievementId?: string;
   };
 }
 

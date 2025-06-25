@@ -71,6 +71,10 @@ export default function Navigation() {
           <NavLink href="/features">Features</NavLink>
           {isAuthenticated && <NavLink href="/dashboard">Dashboard</NavLink>}
           {isAuthenticated && <NavLink href="/analytics">Analytics</NavLink>}
+          {isAuthenticated && <NavLink href="/gamification">Rewards</NavLink>}
+          {isAuthenticated && <NavLink href="/voice-assistant">Voice AI</NavLink>}
+          {isAuthenticated && <NavLink href="/cultural-pulse">Live Pulse</NavLink>}
+          {isAuthenticated && <NavLink href="/payment">Credits</NavLink>}
           {isAuthenticated && <NavLink href="/community">Community</NavLink>}
           <NavLink href="/contact">Contact</NavLink>
         </div>

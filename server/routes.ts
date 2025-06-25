@@ -376,6 +376,269 @@ Respond with JSON in this exact format:
     }
   });
 
+  // Initialize services
+  const { GamificationService } = await import('./gamification');
+  const { VoiceAssistantService } = await import('./voice-service');
+  const { CulturalPulseService } = await import('./cultural-pulse-service');
+  const { PaymentService } = await import('./payment-service');
+  
+  const gamificationService = new GamificationService(storage);
+  const voiceService = new VoiceAssistantService();
+  const pulseService = new CulturalPulseService();
+  const paymentService = new PaymentService();
+
+  // Gamification API endpoints
+  app.get("/api/gamification/stats", async (req, res) => {
+    try {
+      // Mock user ID - in real implementation, get from authenticated user
+      const userId = "mock-user-id";
+      const stats = await gamificationService.getUserStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Gamification stats error:", error);
+      res.status(500).json({ error: "Failed to fetch user stats" });
+    }
+  });
+
+  app.get("/api/gamification/challenges", async (req, res) => {
+    try {
+      const challenges = await gamificationService.getChallenges();
+      res.json(challenges);
+    } catch (error) {
+      console.error("Challenges error:", error);
+      res.status(500).json({ error: "Failed to fetch challenges" });
+    }
+  });
+
+  app.post("/api/gamification/join-challenge", async (req, res) => {
+    try {
+      const { challengeId } = req.body;
+      const userId = "mock-user-id";
+      const result = await gamificationService.joinChallenge(userId, challengeId);
+      res.json(result);
+    } catch (error) {
+      console.error("Join challenge error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get("/api/gamification/leaderboard", async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const leaderboard = await gamificationService.getLeaderboard(limit);
+      res.json(leaderboard);
+    } catch (error) {
+      console.error("Leaderboard error:", error);
+      res.status(500).json({ error: "Failed to fetch leaderboard" });
+    }
+  });
+
+  app.get("/api/gamification/shop", async (req, res) => {
+    try {
+      const items = gamificationService.getShopItems();
+      res.json(items);
+    } catch (error) {
+      console.error("Shop items error:", error);
+      res.status(500).json({ error: "Failed to fetch shop items" });
+    }
+  });
+
+  app.post("/api/gamification/purchase", async (req, res) => {
+    try {
+      const { itemId, price } = req.body;
+      const userId = "mock-user-id";
+      const result = await gamificationService.spendCoins(userId, price, itemId);
+      res.json(result);
+    } catch (error) {
+      console.error("Purchase error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Voice Assistant API endpoints
+  app.get("/api/voice/assistants", (req, res) => {
+    try {
+      const assistants = voiceService.getAssistants();
+      res.json(assistants);
+    } catch (error) {
+      console.error("Voice assistants error:", error);
+      res.status(500).json({ error: "Failed to fetch assistants" });
+    }
+  });
+
+  app.post("/api/voice/analyze", async (req, res) => {
+    try {
+      const { audioData, assistantId } = req.body;
+      const userId = "mock-user-id";
+      
+      // In real implementation, audioData would be processed
+      // For now, simulate voice analysis
+      const mockBlob = new Blob();
+      const analysis = await voiceService.processVoiceMessage(mockBlob, assistantId, userId);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Voice analysis error:", error);
+      res.status(500).json({ error: "Failed to analyze voice message" });
+    }
+  });
+
+  app.get("/api/voice/history", async (req, res) => {
+    try {
+      const userId = "mock-user-id";
+      const limit = parseInt(req.query.limit as string) || 10;
+      const history = await voiceService.getVoiceHistory(userId, limit);
+      res.json(history);
+    } catch (error) {
+      console.error("Voice history error:", error);
+      res.status(500).json({ error: "Failed to fetch voice history" });
+    }
+  });
+
+  // Cultural Pulse API endpoints
+  app.get("/api/cultural-pulse", async (req, res) => {
+    try {
+      const pulse = await pulseService.getCurrentPulse();
+      res.json(pulse);
+    } catch (error) {
+      console.error("Cultural pulse error:", error);
+      res.status(500).json({ error: "Failed to fetch cultural pulse" });
+    }
+  });
+
+  app.get("/api/cultural-pulse/trending", async (req, res) => {
+    try {
+      const region = req.query.region as string;
+      const timeRange = req.query.timeRange as string || '24h';
+      const topics = await pulseService.getTrendingTopics(region, timeRange);
+      res.json(topics);
+    } catch (error) {
+      console.error("Trending topics error:", error);
+      res.status(500).json({ error: "Failed to fetch trending topics" });
+    }
+  });
+
+  app.get("/api/cultural-pulse/regional-mood", async (req, res) => {
+    try {
+      const region = req.query.region as string;
+      const mood = await pulseService.getRegionalMood(region);
+      res.json(mood);
+    } catch (error) {
+      console.error("Regional mood error:", error);
+      res.status(500).json({ error: "Failed to fetch regional mood" });
+    }
+  });
+
+  app.get("/api/cultural-pulse/festival", async (req, res) => {
+    try {
+      const festivalPulse = await pulseService.getFestivalPulse();
+      res.json(festivalPulse);
+    } catch (error) {
+      console.error("Festival pulse error:", error);
+      res.status(500).json({ error: "Failed to fetch festival pulse" });
+    }
+  });
+
+  app.get("/api/cultural-pulse/viral-predictions", async (req, res) => {
+    try {
+      const category = req.query.category as string;
+      const predictions = await pulseService.getViralPredictions(category);
+      res.json(predictions);
+    } catch (error) {
+      console.error("Viral predictions error:", error);
+      res.status(500).json({ error: "Failed to fetch viral predictions" });
+    }
+  });
+
+  app.get("/api/cultural-pulse/meme-intelligence", async (req, res) => {
+    try {
+      const memeData = await pulseService.getMemeIntelligence();
+      res.json(memeData);
+    } catch (error) {
+      console.error("Meme intelligence error:", error);
+      res.status(500).json({ error: "Failed to fetch meme intelligence" });
+    }
+  });
+
+  app.get("/api/cultural-pulse/emerging-trends", async (req, res) => {
+    try {
+      const region = req.query.region as string;
+      const trends = await pulseService.getEmergingTrends(region);
+      res.json(trends);
+    } catch (error) {
+      console.error("Emerging trends error:", error);
+      res.status(500).json({ error: "Failed to fetch emerging trends" });
+    }
+  });
+
+  // Payment API endpoints
+  app.get("/api/payment/plans", (req, res) => {
+    try {
+      const subscriptions = paymentService.getSubscriptionPlans();
+      const credits = paymentService.getCreditPackages();
+      res.json({ subscriptions, credits });
+    } catch (error) {
+      console.error("Payment plans error:", error);
+      res.status(500).json({ error: "Failed to fetch payment plans" });
+    }
+  });
+
+  app.get("/api/payment/pricing", (req, res) => {
+    try {
+      const pricing = paymentService.getCreditPricing();
+      res.json(pricing);
+    } catch (error) {
+      console.error("Pricing error:", error);
+      res.status(500).json({ error: "Failed to fetch pricing" });
+    }
+  });
+
+  app.post("/api/payment/create-order", async (req, res) => {
+    try {
+      const { planId } = req.body;
+      const userId = "mock-user-id"; // In real implementation, get from auth
+      const order = await paymentService.createOrder(planId, userId);
+      res.json(order);
+    } catch (error) {
+      console.error("Create order error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/payment/verify", async (req, res) => {
+    try {
+      const { orderId, paymentId, signature } = req.body;
+      const userId = "mock-user-id";
+      const result = await paymentService.verifyPayment(orderId, paymentId, signature, userId);
+      res.json(result);
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      res.status(500).json({ error: "Payment verification failed" });
+    }
+  });
+
+  app.get("/api/payment/balance", async (req, res) => {
+    try {
+      const userId = "mock-user-id";
+      const balance = await paymentService.getCreditBalance(userId);
+      res.json({ balance });
+    } catch (error) {
+      console.error("Balance error:", error);
+      res.status(500).json({ error: "Failed to fetch balance" });
+    }
+  });
+
+  app.get("/api/payment/transactions", async (req, res) => {
+    try {
+      const userId = "mock-user-id";
+      const limit = parseInt(req.query.limit as string) || 20;
+      const transactions = await paymentService.getTransactionHistory(userId, limit);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Transactions error:", error);
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
   // Dashboard endpoint for real-time metrics
   app.get("/api/dashboard/metrics", (req, res) => {
     try {
